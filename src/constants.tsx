@@ -25,10 +25,21 @@ export const MOCK_REVIEWS: Review[] = [
 ];
 
 export const MOCK_GALLERY: GalleryImage[] = [
-  { id: 'i1', bookingId: 'BK101', url: 'https://picsum.photos/seed/yala1/800/600', category: 'Leopards', caption: 'Dawn patrol in Zone 1.' },
-  { id: 'i2', bookingId: 'BK102', url: 'https://picsum.photos/seed/yala2/800/600', category: 'Elephants', caption: 'Gentle giants by the lake.' },
-  { id: 'i3', bookingId: 'BK103', url: 'https://picsum.photos/seed/yala3/800/600', category: 'Birds', caption: 'The colorful Painted Stork.' },
-  { id: 'i4', bookingId: 'BK104', url: 'https://picsum.photos/seed/yala4/800/600', category: 'Landscape', caption: 'Sunset over the park.' },
+  { id: 'i1', bookingId: 'BK101', url: '/gallery/leopard1.jpg', category: 'Leopards', caption: 'Dawn patrol in Zone 1. A majestic leopard spots its prey.' },
+  { id: 'i2', bookingId: 'BK105', url: '/gallery/leopard2.jpg', category: 'Leopards', caption: 'Resting on a Palu tree in the afternoon heat.' },
+  { id: 'i3', bookingId: 'BK112', url: '/gallery/leopard3.jpg', category: 'Leopards', caption: 'Close-up of the Sri Lankan Leopard.' },
+  
+  { id: 'i4', bookingId: 'BK102', url: '/gallery/elephant1.jpg', category: 'Elephants', caption: 'Gentle giants roaming freely.' },
+  { id: 'i5', bookingId: 'BK109', url: '/gallery/elephant2.jpg', category: 'Elephants', caption: 'A solitary tusker cooling off in the mud.' },
+  { id: 'i6', bookingId: 'BK115', url: '/gallery/elephant3.jpg', category: 'Elephants', caption: 'A family herd migrating through the dry zone.' },
+  
+  { id: 'i7', bookingId: 'BK103', url: '/gallery/peacock1.jpg', category: 'Birds', caption: 'A vivid peacock displaying its full feathers.' },
+  { id: 'i8', bookingId: 'BK121', url: '/gallery/peacock2.jpg', category: 'Birds', caption: 'Graceful bird taking flight over the wetlands.' },
+  { id: 'i9', bookingId: 'BK125', url: '/gallery/peacock3.jpg', category: 'Birds', caption: 'Colorful plumage captured beautifully in the morning sun.' },
+  
+  { id: 'i10', bookingId: 'BK104', url: '/gallery/landscape1.jpg', category: 'Landscape', caption: 'Stunning rocky outcrops unique to Yala.' },
+  { id: 'i11', bookingId: 'BK132', url: '/gallery/landscape2.jpg', category: 'Landscape', caption: 'The sprawling arid beauty of the national park plains.' },
+  { id: 'i12', bookingId: 'BK140', url: '/gallery/landscape3.jpg', category: 'Landscape', caption: 'Golden twilight over the untouched sanctuary.' },
 ];
 
 export const TIME_SLOTS = {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MOCK_GALLERY } from '../constants';
 import { Upload, Camera, Search, X } from 'lucide-react';
 
@@ -10,6 +10,74 @@ const Gallery: React.FC = () => {
   const [selectedImg, setSelectedImg] = useState<any>(null);
 
   const categories = ['All', 'Leopards', 'Elephants', 'Birds', 'Landscape'];
+  const uploadCategories = categories.filter(c => c !== 'All');
+
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [uploadCategory, setUploadCategory] = useState(uploadCategories[0]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!showUpload) return;
+      const items = e.clipboardData?.items;
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const file = items[i].getAsFile();
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (ev) => setUploadedFile(ev.target?.result as string);
+              reader.readAsDataURL(file);
+            }
+          }
+        }
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [showUpload]);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setUploadedFile(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setUploadedFile(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpload = () => {
+    if (bookingId.length <= 4) {
+      alert("Invalid Booking ID! Must be longer than 4 characters.");
+      return;
+    }
+    if (!uploadedFile) {
+      alert("Please select a photo.");
+      return;
+    }
+    
+    // In a real app, this would append to the backend
+    // For now we just show a success message including the category
+    alert(`Verification successful! Photo uploaded successfully under the '${uploadCategory}' category for review.`);
+    
+    setShowUpload(false);
+    setUploadedFile(null);
+    setBookingId('');
+    setUploadCategory(uploadCategories[0]);
+  };
+
   const images = filter === 'All' ? MOCK_GALLERY : MOCK_GALLERY.filter(img => img.category === filter);
 
   return (
@@ -67,18 +135,30 @@ const Gallery: React.FC = () => {
         {showUpload && (
           <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-6">
             <div className="bg-beige w-full max-w-lg p-12 relative animate-fadeIn">
-              <button onClick={() => setShowUpload(false)} className="absolute top-6 right-6 hover:text-gold">
+              <button 
+                onClick={() => { setShowUpload(false); setUploadedFile(null); setBookingId(''); }} 
+                className="absolute top-6 right-6 hover:text-gold transition-colors"
+               >
                 <X size={24} />
               </button>
               <h2 className="text-3xl serif mb-6 text-center">Share Your Safari</h2>
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-gold">Booking ID Verification</label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-gold text-left block">
+                      Booking ID Verification
+                    </label>
+                    {bookingId.length > 0 && (
+                      <span className={`text-[10px] uppercase font-bold tracking-widest ${bookingId.length > 4 ? 'text-green-600' : 'text-red-500'}`}>
+                        {bookingId.length > 4 ? 'Verified \u2713' : 'Invalid \u2717'}
+                      </span>
+                    )}
+                  </div>
                   <div className="relative">
                     <input 
                       type="text" 
                       placeholder="e.g. Y360-1234" 
-                      className="w-full p-4 border border-gold/20 focus:border-gold outline-none serif"
+                      className="w-full p-4 border border-gold/20 focus:border-gold outline-none serif transition-colors"
                       value={bookingId}
                       onChange={e => setBookingId(e.target.value)}
                     />
@@ -86,12 +166,55 @@ const Gallery: React.FC = () => {
                   </div>
                   <p className="text-[10px] text-gray-400 italic">Validation required to prevent spam and ensure authentic content.</p>
                 </div>
-                <div className="h-40 border-2 border-dashed border-gold/30 flex flex-col items-center justify-center space-y-4 bg-white/50">
-                  <Camera className="text-gold" size={32} strokeWidth={1} />
-                  <p className="text-xs text-gray-500">Drag and drop your captures here</p>
+                {/* Drag and drop area */}
+                <div 
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`h-48 border-2 border-dashed flex flex-col items-center justify-center space-y-4 cursor-pointer transition-all ${isDragging ? 'border-gold bg-gold/5' : 'border-gold/30 bg-white/50 hover:bg-white'} overflow-hidden relative group`}
+                >
+                  <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleFileSelect} />
+                  
+                  {uploadedFile ? (
+                    <>
+                      <img src={uploadedFile} alt="Preview" className="w-full h-full object-cover absolute inset-0" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-white text-xs font-bold uppercase tracking-widest">Change Photo</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Camera className={`transition-colors ${isDragging ? 'text-gold' : 'text-gold/60'}`} size={32} strokeWidth={1} />
+                      <div className="text-center">
+                        <p className="text-xs text-black font-bold mb-1">Click to browse or drag & drop</p>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Or paste (Ctrl+V) an image here</p>
+                      </div>
+                    </>
+                  )}
                 </div>
+
+                {/* Category Selection */}
+                {uploadedFile && (
+                  <div className="space-y-2 animate-fadeIn">
+                    <label className="text-[10px] uppercase font-bold tracking-widest text-gold text-left block">
+                      Select Category
+                    </label>
+                    <select 
+                      value={uploadCategory}
+                      onChange={(e) => setUploadCategory(e.target.value)}
+                      className="w-full p-4 border border-gold/20 focus:border-gold outline-none serif bg-white cursor-pointer"
+                    >
+                      {uploadCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <button 
-                  disabled={!bookingId}
+                  disabled={!uploadedFile || bookingId.length <= 4}
+                  onClick={handleUpload}
                   className="w-full py-4 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Verify & Upload

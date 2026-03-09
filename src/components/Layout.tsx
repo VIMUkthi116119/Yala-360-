@@ -1,20 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Instagram, Facebook, Twitter } from 'lucide-react';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -31,12 +22,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen flex flex-col">
       {/* Navigation */}
       <nav 
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 lg:px-12 py-4 flex items-center justify-between ${
-          isScrolled || location.pathname !== '/' ? 'bg-beige/95 shadow-md py-3' : 'bg-transparent text-white'
-        }`}
+        className="fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 lg:px-12 py-3 bg-beige shadow-md flex items-center justify-between text-black"
       >
         <Link to="/" className="flex items-center space-x-2">
-          <span className={`text-2xl font-bold tracking-widest serif uppercase ${isScrolled || location.pathname !== '/' ? 'text-gold' : 'text-white'}`}>
+          <span className="text-2xl font-bold tracking-widest serif uppercase text-gold">
             YALA360
           </span>
         </Link>
