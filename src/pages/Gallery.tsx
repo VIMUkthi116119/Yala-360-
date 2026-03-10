@@ -6,8 +6,6 @@ import { Upload, Camera, Search, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { storage } from '../firebase';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 const compressImage = (file: File): Promise<string> => {
   return new Promise((resolve) => {
@@ -60,6 +58,7 @@ const Gallery: React.FC = () => {
   const [uploadCategory, setUploadCategory] = useState(uploadCategories[0]);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
   const [fetchedUserPhotos, setFetchedUserPhotos] = useState<typeof MOCK_GALLERY>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -143,19 +142,14 @@ const Gallery: React.FC = () => {
     }
     
     setIsUploading(true);
+    setUploadStatus('Connecting to Firebase Storage...');
     
     try {
-      // Create a unique filename for the image
-      const filename = `guest_photos/${Date.now()}_${Math.random().toString(36).substring(2)}.jpg`;
-      const storageRef = ref(storage, filename);
+      setUploadStatus('Saving details to Database (Firebase)...');
       
-      // Upload Base64 string to Firebase Storage
-      await uploadString(storageRef, uploadedFile, 'data_url');
-      const downloadUrl = await getDownloadURL(storageRef);
-
-      // Add record to Firestore
+      // Because Firebase Storage is not enabled, we save the compressed base64 directly to Firestore under "guest_photos"
       await addDoc(collection(db, "guest_photos"), {
-        imageUrl: downloadUrl,
+        imageUrl: uploadedFile, // Compressed Base64 string
         bookingId: bookingId,
         category: uploadCategory,
         userId: currentUser?.uid,
@@ -172,9 +166,14 @@ const Gallery: React.FC = () => {
       setUploadCategory(uploadCategories[0]);
     } catch (err: unknown) {
       console.error("Upload failed", err);
-      alert(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Upload failed. Please try again.";
+      setUploadStatus(`Error: ${errorMessage}`);
+      alert(errorMessage);
     } finally {
       setIsUploading(false);
+      if (uploadStatus && !uploadStatus.startsWith('Error:')) {
+        setUploadStatus('');
+      }
     }
   };
 
@@ -325,6 +324,11 @@ const Gallery: React.FC = () => {
                     </>
                   ) : 'Verify & Upload'}
                 </button>
+                {uploadStatus && (
+                  <p className={`text-[10px] text-center uppercase tracking-widest font-bold ${uploadStatus.startsWith('Error:') ? 'text-red-500' : 'text-gold'}`}>
+                    {uploadStatus}
+                  </p>
+                )}
               </div>
             </div>
           </div>
