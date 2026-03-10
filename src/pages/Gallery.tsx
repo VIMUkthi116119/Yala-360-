@@ -5,7 +5,9 @@ import { MOCK_GALLERY } from '../constants';
 import { Upload, Camera, Search, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { storage } from '../firebase';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 const compressImage = (file: File): Promise<string> => {
   return new Promise((resolve) => {
@@ -58,9 +60,30 @@ const Gallery: React.FC = () => {
   const [uploadCategory, setUploadCategory] = useState(uploadCategories[0]);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [fetchedUserPhotos, setFetchedUserPhotos] = useState<typeof MOCK_GALLERY>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+
+  useEffect(() => {
+    // Fetch photos from firestore
+    const q = query(collection(db, 'guest_photos'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const photos: typeof MOCK_GALLERY = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          url: data.imageUrl,
+          caption: "Guest Photo", // Could add a caption field later
+          category: data.category,
+          bookingId: data.bookingId
+        };
+      });
+      // Filter out those with no URL (or if you want to implement approval: photos.filter(p => data.approved))
+      setFetchedUserPhotos(photos);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handlePaste = async (e: ClipboardEvent) => {
@@ -122,18 +145,26 @@ const Gallery: React.FC = () => {
     setIsUploading(true);
     
     try {
-      // Add compressed image to Firestore
+      // Create a unique filename for the image
+      const filename = `guest_photos/${Date.now()}_${Math.random().toString(36).substring(2)}.jpg`;
+      const storageRef = ref(storage, filename);
+      
+      // Upload Base64 string to Firebase Storage
+      await uploadString(storageRef, uploadedFile, 'data_url');
+      const downloadUrl = await getDownloadURL(storageRef);
+
+      // Add record to Firestore
       await addDoc(collection(db, "guest_photos"), {
-        imageUrl: uploadedFile, // Compressed Base64 string
+        imageUrl: downloadUrl,
         bookingId: bookingId,
         category: uploadCategory,
         userId: currentUser?.uid,
         userEmail: currentUser?.email,
         createdAt: serverTimestamp(),
-        approved: false // Set to false by default for moderation
+        approved: true // Setting to true for now so it shows up immediately along with MOCK_GALLERY
       });
       
-      alert(`Verification successful! Photo uploaded successfully under the '${uploadCategory}' category for review.`);
+      alert(`Verification successful! Photo uploaded successfully under the '${uploadCategory}' category.`);
       
       setShowUpload(false);
       setUploadedFile(null);
@@ -147,7 +178,8 @@ const Gallery: React.FC = () => {
     }
   };
 
-  const images = filter === 'All' ? MOCK_GALLERY : MOCK_GALLERY.filter(img => img.category === filter);
+  const combinedGallery = [...fetchedUserPhotos, ...MOCK_GALLERY];
+  const images = filter === 'All' ? combinedGallery : combinedGallery.filter(img => img.category === filter);
 
   return (
     <div className="pt-32 pb-24 px-6 lg:px-24 bg-beige min-h-screen">

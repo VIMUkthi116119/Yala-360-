@@ -8,7 +8,7 @@ import { Users, Car, CheckCircle, ChevronRight, ChevronLeft, CreditCard } from '
 const Booking: React.FC = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    type: SafariType.MORNING,
+    type: SafariType.MORNING as SafariType,
     date: new Date().toISOString().split('T')[0],
     timeSlot: '',
     visitors: 1,

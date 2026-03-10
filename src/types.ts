@@ -1,15 +1,17 @@
 
-export enum SafariType {
-  MORNING = 'Morning Safari',
-  EVENING = 'Evening Safari',
-  FULL_DAY = 'Full Day Safari'
-}
+export const SafariType = {
+  MORNING: 'Morning Safari',
+  EVENING: 'Evening Safari',
+  FULL_DAY: 'Full Day Safari'
+} as const;
+export type SafariType = (typeof SafariType)[keyof typeof SafariType];
 
-export enum CrowdDensity {
-  LOW = 'Low',
-  MEDIUM = 'Medium',
-  HIGH = 'High'
-}
+export const CrowdDensity = {
+  LOW: 'Low',
+  MEDIUM: 'Medium',
+  HIGH: 'High'
+} as const;
+export type CrowdDensity = (typeof CrowdDensity)[keyof typeof CrowdDensity];
 
 export interface Booking {
   id: string;
