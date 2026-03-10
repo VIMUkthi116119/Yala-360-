@@ -1,9 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 // Corrected SafariType import to come from types.ts instead of constants.tsx
 import { DRIVERS, GUIDES, TIME_SLOTS, CROWD_DENSITY_MOCK } from '../constants';
 import { SafariType } from '../types';
-import { Calendar as CalendarIcon, Users, Car, CheckCircle, ChevronRight, ChevronLeft, CreditCard } from 'lucide-react';
+import { Users, Car, CheckCircle, ChevronRight, ChevronLeft, CreditCard } from 'lucide-react';
 
 const Booking: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -206,7 +206,10 @@ const Booking: React.FC = () => {
   );
 
   // Step 7: Confirmation
-  const Step7 = () => (
+  const Step7 = () => {
+    const bookingRef = useMemo(() => `Y360-${(Math.random()*10000).toFixed(0)}`, []);
+    
+    return (
     <div className="text-center space-y-8 animate-fadeIn py-20">
       <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
         <CheckCircle size={64} />
@@ -217,7 +220,7 @@ const Booking: React.FC = () => {
       <div className="bg-white max-w-md mx-auto p-10 border border-gray-100 text-left space-y-4 shadow-xl">
         <div className="flex justify-between border-b pb-2 text-sm">
           <span className="text-gray-400">Booking ID</span>
-          <span className="font-bold">Y360-{(Math.random()*10000).toFixed(0)}</span>
+          <span className="font-bold">{bookingRef}</span>
         </div>
         <div className="flex justify-between border-b pb-2 text-sm">
           <span className="text-gray-400">Type</span>
@@ -233,12 +236,13 @@ const Booking: React.FC = () => {
         </div>
       </div>
       
-      <div className="flex justify-center space-x-4 pt-10">
-        <button onClick={() => window.print()} className="px-8 py-3 border border-gold text-gold hover:bg-gold hover:text-white transition-all uppercase tracking-widest text-xs font-bold">Print Receipt</button>
-        <button onClick={() => window.location.href = '#/'} className="px-8 py-3 bg-black text-white hover:bg-gold transition-all uppercase tracking-widest text-xs font-bold">Back to Home</button>
+      <div className="flex flex-col sm:flex-row justify-center gap-4 pt-10">
+        <button onClick={() => window.print()} className="w-full sm:w-auto px-8 py-3 border border-gold text-gold hover:bg-gold hover:text-white transition-all uppercase tracking-widest text-xs font-bold">Print Receipt</button>
+        <button onClick={() => window.location.href = '#/'} className="w-full sm:w-auto px-8 py-3 bg-black text-white hover:bg-gold transition-all uppercase tracking-widest text-xs font-bold">Back to Home</button>
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <div className="pt-32 pb-24 px-6 lg:px-24 bg-beige min-h-screen">
@@ -250,7 +254,7 @@ const Booking: React.FC = () => {
             {[1,2,3,4,5,6].map(s => (
               <div 
                 key={s} 
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold text-white' : 'bg-gray-100 text-gray-400'}`}
+                className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step >= s ? 'bg-gold text-white' : 'bg-gray-100 text-gray-400'}`}
               >
                 {s}
               </div>
@@ -258,7 +262,7 @@ const Booking: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-white/40 p-12 lg:p-20 shadow-sm border border-white">
+        <div className="bg-white/40 p-6 md:p-12 lg:p-20 shadow-sm border border-white">
           {step === 1 && <Step1 />}
           {step === 2 && <Step2And3 />}
           {step === 3 && <Step2And3 />}
@@ -269,16 +273,16 @@ const Booking: React.FC = () => {
 
           {/* Navigation Buttons */}
           {step < 7 && (
-            <div className="mt-16 flex justify-between">
+            <div className="mt-16 flex flex-col-reverse sm:flex-row justify-between gap-4">
               {step > 1 ? (
-                <button onClick={prevStep} className="flex items-center space-x-2 text-gold uppercase tracking-widest text-xs font-bold hover:scale-105 transition-transform">
+                <button onClick={prevStep} className="flex items-center justify-center p-4 sm:p-0 sm:justify-start space-x-2 text-gold uppercase tracking-widest text-xs font-bold hover:scale-105 transition-transform w-full sm:w-auto">
                   <ChevronLeft size={16} /> <span>Back</span>
                 </button>
-              ) : <div></div>}
+              ) : <div className="hidden sm:block"></div>}
               
               <button 
                 onClick={nextStep} 
-                className={`px-12 py-4 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all flex items-center space-x-2`}
+                className={`w-full sm:w-auto px-6 sm:px-12 py-4 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all flex items-center justify-center space-x-2`}
               >
                 <span>{step === 6 ? 'Pay & Confirm' : 'Next Step'}</span>
                 <ChevronRight size={16} />

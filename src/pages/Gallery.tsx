@@ -1,13 +1,55 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MOCK_GALLERY } from '../constants';
-import { Upload, Camera, Search, X } from 'lucide-react';
+import { Upload, Camera, Search, X, Loader2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+const compressImage = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Return base64 with moderate compression to keep it under 1MB
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+};
 
 const Gallery: React.FC = () => {
   const [filter, setFilter] = useState('All');
   const [showUpload, setShowUpload] = useState(false);
   const [bookingId, setBookingId] = useState('');
-  const [selectedImg, setSelectedImg] = useState<any>(null);
+  const [selectedImg, setSelectedImg] = useState<typeof MOCK_GALLERY[0] | null>(null);
 
   const categories = ['All', 'Leopards', 'Elephants', 'Birds', 'Landscape'];
   const uploadCategories = categories.filter(c => c !== 'All');
@@ -15,10 +57,13 @@ const Gallery: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [uploadCategory, setUploadCategory] = useState(uploadCategories[0]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
+    const handlePaste = async (e: ClipboardEvent) => {
       if (!showUpload) return;
       const items = e.clipboardData?.items;
       if (items) {
@@ -26,9 +71,8 @@ const Gallery: React.FC = () => {
           if (items[i].type.indexOf('image') !== -1) {
             const file = items[i].getAsFile();
             if (file) {
-              const reader = new FileReader();
-              reader.onload = (ev) => setUploadedFile(ev.target?.result as string);
-              reader.readAsDataURL(file);
+              const compressedBase64 = await compressImage(file);
+              setUploadedFile(compressedBase64);
             }
           }
         }
@@ -38,27 +82,34 @@ const Gallery: React.FC = () => {
     return () => window.removeEventListener('paste', handlePaste);
   }, [showUpload]);
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setUploadedFile(ev.target?.result as string);
-      reader.readAsDataURL(file);
+      const compressedBase64 = await compressImage(file);
+      setUploadedFile(compressedBase64);
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setUploadedFile(ev.target?.result as string);
-      reader.readAsDataURL(file);
+      const compressedBase64 = await compressImage(file);
+      setUploadedFile(compressedBase64);
     }
   };
 
-  const handleUpload = () => {
+  const handleUploadClick = () => {
+    if (!currentUser) {
+      alert("Please sign in or create an account to share your experience!");
+      navigate('/login');
+      return;
+    }
+    setShowUpload(true);
+  };
+
+  const handleUpload = async () => {
     if (bookingId.length <= 4) {
       alert("Invalid Booking ID! Must be longer than 4 characters.");
       return;
@@ -68,14 +119,32 @@ const Gallery: React.FC = () => {
       return;
     }
     
-    // In a real app, this would append to the backend
-    // For now we just show a success message including the category
-    alert(`Verification successful! Photo uploaded successfully under the '${uploadCategory}' category for review.`);
+    setIsUploading(true);
     
-    setShowUpload(false);
-    setUploadedFile(null);
-    setBookingId('');
-    setUploadCategory(uploadCategories[0]);
+    try {
+      // Add compressed image to Firestore
+      await addDoc(collection(db, "guest_photos"), {
+        imageUrl: uploadedFile, // Compressed Base64 string
+        bookingId: bookingId,
+        category: uploadCategory,
+        userId: currentUser?.uid,
+        userEmail: currentUser?.email,
+        createdAt: serverTimestamp(),
+        approved: false // Set to false by default for moderation
+      });
+      
+      alert(`Verification successful! Photo uploaded successfully under the '${uploadCategory}' category for review.`);
+      
+      setShowUpload(false);
+      setUploadedFile(null);
+      setBookingId('');
+      setUploadCategory(uploadCategories[0]);
+    } catch (err: unknown) {
+      console.error("Upload failed", err);
+      alert(err instanceof Error ? err.message : "Upload failed. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const images = filter === 'All' ? MOCK_GALLERY : MOCK_GALLERY.filter(img => img.category === filter);
@@ -89,7 +158,7 @@ const Gallery: React.FC = () => {
             <p className="text-gray-500 font-light italic">Memories captured by our community. Uploads require a valid Booking ID.</p>
           </div>
           <button 
-            onClick={() => setShowUpload(true)}
+            onClick={handleUploadClick}
             className="px-8 py-3 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all flex items-center space-x-2"
           >
             <Upload size={16} />
@@ -213,11 +282,16 @@ const Gallery: React.FC = () => {
                 )}
 
                 <button 
-                  disabled={!uploadedFile || bookingId.length <= 4}
+                  disabled={!uploadedFile || bookingId.length <= 4 || isUploading}
                   onClick={handleUpload}
-                  className="w-full py-4 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 flex items-center justify-center bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Verify & Upload
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin mr-2" />
+                      Uploading Photo...
+                    </>
+                  ) : 'Verify & Upload'}
                 </button>
               </div>
             </div>

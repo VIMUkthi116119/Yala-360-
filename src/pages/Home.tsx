@@ -3,7 +3,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Compass, Calendar, Camera, Star, ShieldCheck, Leaf, Users } from 'lucide-react';
 
-const FeatureCard = ({ icon: Icon, title, desc, link }: any) => (
+interface FeatureCardProps {
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  link: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, desc, link }) => (
   <Link to={link} className="group bg-white p-10 flex flex-col items-center text-center space-y-4 hover:shadow-2xl transition-all border-b-4 border-transparent hover:border-gold">
     <div className="w-16 h-16 bg-beige rounded-full flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
       <Icon size={32} strokeWidth={1.5} />
@@ -28,11 +35,11 @@ const Home: React.FC = () => {
         <div className="relative z-10 text-center text-white px-6 max-w-4xl">
           <h1 className="text-5xl md:text-8xl serif mb-6 animate-fadeIn">Wildly Elegant.</h1>
           <p className="text-lg md:text-2xl font-light mb-12 tracking-widest uppercase italic">The Ultimate Luxury Safari Experience in Yala</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link to="/booking" className="px-10 py-4 bg-gold text-white font-bold uppercase tracking-widest hover:bg-white hover:text-gold transition-all">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+            <Link to="/booking" className="w-full sm:w-auto px-10 py-4 bg-gold text-white font-bold uppercase tracking-widest hover:bg-white hover:text-gold transition-all text-center">
               Book Your Safari
             </Link>
-            <Link to="/about" className="px-10 py-4 border-2 border-white text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+            <Link to="/about" className="w-full sm:w-auto px-10 py-4 border-2 border-white text-white font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all text-center">
               Explore Park
             </Link>
           </div>
@@ -86,36 +93,36 @@ const Home: React.FC = () => {
       <section className="py-24 bg-white px-6 lg:px-24">
         <div className="flex flex-col space-y-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 checkerboard-row">
-            <div className="h-[500px] overflow-hidden">
+            <div className="h-[300px] lg:h-[500px] overflow-hidden order-1">
               <img src="https://picsum.photos/seed/eco1/800/800" className="w-full h-full object-cover" alt="Eco Safari" />
             </div>
-            <div className="bg-beige p-12 lg:p-24 flex flex-col justify-center space-y-6">
+            <div className="bg-beige p-8 lg:p-24 flex flex-col justify-center space-y-6 order-2">
               <Leaf className="text-gold" size={40} strokeWidth={1} />
-              <h3 className="text-4xl serif">Eco-Friendly Tourism</h3>
+              <h3 className="text-3xl lg:text-4xl serif">Eco-Friendly Tourism</h3>
               <p className="text-gray-600 font-light leading-relaxed">
                 We partner with operators who prioritize carbon-neutral practices and wildlife-first driving protocols. Every booking supports Yala's conservation efforts.
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 checkerboard-row flex-row-reverse">
-            <div className="h-[500px] overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 checkerboard-row">
+            <div className="h-[300px] lg:h-[500px] overflow-hidden order-1 lg:order-2">
               <img src="https://picsum.photos/seed/crowd1/800/800" className="w-full h-full object-cover" alt="Crowd Aware" />
             </div>
-            <div className="bg-[#1A1A1A] text-white p-12 lg:p-24 flex flex-col justify-center space-y-6">
+            <div className="bg-[#1A1A1A] text-white p-8 lg:p-24 flex flex-col justify-center space-y-6 order-2 lg:order-1">
               <ShieldCheck className="text-gold" size={40} strokeWidth={1} />
-              <h3 className="text-4xl serif">Crowd-Aware Planning</h3>
+              <h3 className="text-3xl lg:text-4xl serif">Crowd-Aware Planning</h3>
               <p className="text-gray-300 font-light leading-relaxed">
                 Our proprietary algorithm analyzes historical and real-time jeep counts to suggest slots with the lowest human footprint, giving you a front-row seat to nature.
               </p>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 checkerboard-row">
-            <div className="h-[500px] overflow-hidden">
+            <div className="h-[300px] lg:h-[500px] overflow-hidden order-1">
               <img src="https://picsum.photos/seed/guide3/800/800" className="w-full h-full object-cover" alt="Trusted Guides" />
             </div>
-            <div className="bg-white p-12 lg:p-24 flex flex-col justify-center space-y-6 border border-gray-100">
+            <div className="bg-white p-8 lg:p-24 flex flex-col justify-center space-y-6 border border-gray-100 order-2">
               <Users className="text-gold" size={40} strokeWidth={1} />
-              <h3 className="text-4xl serif">Trusted Guides & Drivers</h3>
+              <h3 className="text-3xl lg:text-4xl serif">Trusted Guides & Drivers</h3>
               <p className="text-gray-600 font-light leading-relaxed">
                 Only the top-rated professionals make it onto our platform. Experience deep local knowledge and unparalleled safety standards.
               </p>

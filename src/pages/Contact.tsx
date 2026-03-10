@@ -1,19 +1,57 @@
 
-import React from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Contact: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    setSuccess(false);
+
+    try {
+      await addDoc(collection(db, 'inquiries'), {
+        ...formData,
+        createdAt: new Date()
+      });
+      setSuccess(true);
+      setFormData({ name: '', email: '', message: '' });
+    } catch (err) {
+      setError('Failed to send message. Please try again later.');
+      console.error('Error adding document: ', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="pt-32 pb-24 px-6 lg:px-24 bg-beige min-h-screen">
       <div className="max-w-6xl mx-auto space-y-24">
         <header className="text-center space-y-4">
-          <h1 className="text-6xl serif">Connect With Us</h1>
+          <h1 className="text-4xl md:text-6xl serif">Connect With Us</h1>
           <p className="text-gray-500 font-light italic max-w-2xl mx-auto">
             Whether you're planning a bespoke private tour or seeking assistance with your reservation, our luxury concierge team is at your service.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           <div className="space-y-12">
             <div className="space-y-8">
               <h2 className="text-3xl serif">Get in Touch</h2>
@@ -71,16 +109,54 @@ const Contact: React.FC = () => {
 
           <div className="bg-white p-12 shadow-2xl border-t-4 border-gold space-y-8">
             <h2 className="text-3xl serif">Send a Message</h2>
-            <form className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <input type="text" placeholder="Full Name" className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full" />
-                <input type="email" placeholder="Email Address" className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full" />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {success && (
+                <div className="bg-green-50 text-green-600 p-4 flex items-center space-x-2 text-sm border border-green-200">
+                  <CheckCircle size={16} />
+                  <span>Message sent successfully! We will get back to you shortly.</span>
+                </div>
+              )}
+              {error && (
+                <div className="bg-red-50 text-red-600 p-4 text-sm font-light border border-red-200">
+                  {error}
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <input 
+                  type="text" 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  placeholder="Full Name" 
+                  className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full" 
+                />
+                <input 
+                  type="email" 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Email Address" 
+                  className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full" 
+                />
               </div>
-              <input type="text" placeholder="Subject" className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full" />
-              <textarea placeholder="Your Message" rows={6} className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full resize-none"></textarea>
-              <button className="w-full py-4 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all flex items-center justify-center space-x-3">
+              <textarea 
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
+                placeholder="Your Message" 
+                rows={6} 
+                className="p-4 border border-beige bg-beige/10 focus:border-gold outline-none w-full resize-none"
+              ></textarea>
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-gold text-white uppercase tracking-widest text-xs font-bold hover:bg-black transition-all flex items-center justify-center space-x-3 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
                 <Send size={16} />
-                <span>Send Inquery</span>
+                <span>{isSubmitting ? 'Sending...' : 'Send Inquiry'}</span>
               </button>
             </form>
           </div>

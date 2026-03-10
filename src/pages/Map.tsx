@@ -5,6 +5,7 @@ import { MapPin, Info, Coffee, Camera, X } from 'lucide-react';
 
 const MapPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sightings' | 'services' | 'attractions'>('sightings');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedPin, setSelectedPin] = useState<any>(null);
 
   const services = [
@@ -85,7 +86,7 @@ const MapPage: React.FC = () => {
           {renderPins()}
 
           {/* Map Controls */}
-          <div className="absolute top-8 left-8 flex flex-col space-y-2 z-10">
+          <div className="absolute top-4 left-4 sm:top-8 sm:left-8 flex flex-col space-y-2 z-10 w-48 sm:w-auto">
             <button 
               onClick={() => setActiveTab('sightings')}
               className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'sightings' ? 'bg-gold text-white shadow-lg' : 'bg-white text-gray-500 hover:text-gold'}`}
@@ -108,7 +109,7 @@ const MapPage: React.FC = () => {
 
           {/* Selected Info Panel */}
           {selectedPin && (
-            <div className="absolute bottom-8 right-8 w-80 bg-white shadow-2xl p-6 border-t-4 border-gold animate-slideInRight z-20">
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-auto sm:right-8 sm:w-80 bg-white shadow-2xl p-6 border-t-4 border-gold animate-slideInRight z-20">
               <button onClick={() => setSelectedPin(null)} className="absolute top-2 right-2 text-gray-400 hover:text-black">
                 <X size={16} />
               </button>
@@ -117,9 +118,9 @@ const MapPage: React.FC = () => {
                   <Info size={20} />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Selected Detail</span>
                 </div>
-                <h3 className="text-xl serif">{selectedPin.animal || selectedPin.name}</h3>
+                <h3 className="text-xl serif">{String(selectedPin.animal || selectedPin.name)}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">
-                  {selectedPin.desc || `Last spotted at ${selectedPin.time} near ${selectedPin.location}. This zone is currently showing moderate activity.`}
+                  {selectedPin.desc ? String(selectedPin.desc) : `Last spotted at ${String(selectedPin.time)} near ${String(selectedPin.location)}. This zone is currently showing moderate activity.`}
                 </p>
                 <button className="w-full py-2 bg-beige text-gold text-xs font-bold uppercase tracking-widest border border-gold/20 hover:bg-gold hover:text-white transition-all">
                   Navigate To

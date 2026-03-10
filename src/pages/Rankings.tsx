@@ -3,7 +3,19 @@ import React from 'react';
 import { DRIVERS, GUIDES } from '../constants';
 import { Star, Award, ShieldCheck, TrendingUp } from 'lucide-react';
 
-const PersonnelCard = ({ person, rank }: any) => (
+interface PersonnelProps {
+  person: {
+    id: string;
+    name: string;
+    role: string;
+    experience: string;
+    rating: number;
+    image: string;
+  };
+  rank: number;
+}
+
+const PersonnelCard: React.FC<PersonnelProps> = ({ person, rank }) => (
   <div className="bg-white border border-gray-100 p-8 group hover:shadow-2xl transition-all relative overflow-hidden">
     {rank <= 1 && (
       <div className="absolute top-0 right-0 p-2 bg-gold text-white">

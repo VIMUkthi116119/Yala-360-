@@ -3,7 +3,19 @@ import React, { useState } from 'react';
 import { MOCK_REVIEWS } from '../constants';
 import { Star, ShieldCheck, Filter } from 'lucide-react';
 
-const ReviewCard = ({ review }: any) => (
+interface ReviewProps {
+  review: {
+    id: string;
+    userName: string;
+    date: string;
+    rating: number;
+    comment: string;
+    type: string;
+    bookingId: string;
+  };
+}
+
+const ReviewCard: React.FC<ReviewProps> = ({ review }) => (
   <div className="bg-white p-10 border border-gray-100 shadow-sm space-y-6 relative group hover:shadow-xl transition-all">
     <div className="absolute top-6 right-10 text-gold/20 flex space-x-1">
       <Star size={16} />
@@ -46,8 +58,8 @@ const Reviews: React.FC = () => {
           <p className="text-gray-500 font-light italic">Real experiences from verified luxury travelers.</p>
         </header>
 
-        <div className="flex items-center justify-between border-b border-gold/20 pb-6">
-          <div className="flex space-x-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gold/20 pb-6 gap-4">
+          <div className="flex flex-wrap gap-4 sm:space-x-6 sm:gap-0">
             <button className={`text-xs font-bold uppercase tracking-widest transition-all ${filter === 'All' ? 'text-gold underline underline-offset-8' : 'text-gray-400 hover:text-gold'}`} onClick={() => setFilter('All')}>All Reviews</button>
             <button className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-gold">Top Rated</button>
             <button className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-gold">Recent</button>

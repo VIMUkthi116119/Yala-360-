@@ -1,15 +1,22 @@
 
 import React from 'react';
 
-const StoryBlock = ({ title, text, image, reverse }: any) => (
+interface StoryBlockProps {
+  title: string;
+  text: string;
+  image: string;
+  reverse?: boolean;
+}
+
+const StoryBlock: React.FC<StoryBlockProps> = ({ title, text, image, reverse }) => (
   <div className={`flex flex-col lg:flex-row ${reverse ? 'lg:flex-row-reverse' : ''} items-center bg-white mb-20 shadow-sm overflow-hidden`}>
-    <div className="lg:w-1/2 h-[600px]">
+    <div className="w-full lg:w-1/2 h-[300px] lg:h-[600px]">
       <img src={image} alt={title} className="w-full h-full object-cover" />
     </div>
-    <div className="lg:w-1/2 p-12 lg:p-20 space-y-6">
-      <h2 className="text-4xl serif text-gold">{title}</h2>
+    <div className="w-full lg:w-1/2 p-8 lg:p-20 space-y-6">
+      <h2 className="text-3xl lg:text-4xl serif text-gold">{title}</h2>
       <div className="w-16 h-[1px] bg-gold"></div>
-      <p className="text-gray-600 font-light leading-loose text-lg">
+      <p className="text-gray-600 font-light leading-relaxed lg:leading-loose text-base lg:text-lg">
         {text}
       </p>
     </div>
@@ -21,8 +28,8 @@ const About: React.FC = () => {
     <div className="pt-32 pb-24 px-6 lg:px-24 bg-beige">
       <header className="max-w-4xl mx-auto text-center mb-24">
         <span className="text-gold uppercase tracking-widest text-xs font-bold mb-4 block">The Jewel of the East</span>
-        <h1 className="text-6xl serif mb-8">Understanding Yala</h1>
-        <p className="text-xl text-gray-600 font-light leading-relaxed italic">
+        <h1 className="text-4xl md:text-6xl serif mb-8">Understanding Yala</h1>
+        <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed italic">
           Spanning 979 square kilometers, Yala is a tapestry of semi-arid thorn scrub, monsoon forests, and freshwater wetlands.
         </p>
       </header>
