@@ -1003,10 +1003,15 @@ function Step6Confirmation({ booking, confirmationData }: any) {
             ctx.drawImage(img, 0, 0, 300, 300);
             const qrImg = canvas.toDataURL('image/png');
 
-            // Set QR position relative to footer to avoid overlap
+            // Position QR code below 'TOTAL' but above the footer
             const footerTop = 270;
             const qrHeight = 55;
-            const qrY = footerTop - qrHeight - 10; // 10mm gap above footer
+            
+            // start at y + 10, but don't let it overlap footer
+            let qrY = Math.max(y + 10, 200); // at least 200mm down if y is small
+            if (qrY + qrHeight > footerTop - 5) {
+              qrY = footerTop - qrHeight - 5; // stick it to just above footer
+            }
 
             doc.setFillColor(248, 248, 248);
             doc.roundedRect(pw / 2 - 25, qrY, 50, qrHeight, 3, 3, 'F');
