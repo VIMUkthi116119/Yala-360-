@@ -17,6 +17,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Gallery', path: '/gallery' },
     { name: 'Reviews', path: '/reviews' },
     { name: 'Rankings', path: '/rankings' },
+    { name: 'Profile', path: '/profile' },
     { name: 'Contact', path: '/contact' },
   ];
 

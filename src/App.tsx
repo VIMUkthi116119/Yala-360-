@@ -9,6 +9,7 @@ import Gallery from './pages/Gallery';
 import Reviews from './pages/Reviews';
 import Rankings from './pages/Rankings';
 import Contact from './pages/Contact';
+import ProfilePage from './pages/ProfilePage';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
@@ -27,6 +28,7 @@ function App() {
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/rankings" element={<Rankings />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Login />} />
           </Routes>
