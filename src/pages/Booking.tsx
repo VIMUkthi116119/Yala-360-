@@ -1003,23 +1003,28 @@ function Step6Confirmation({ booking, confirmationData }: any) {
             ctx.drawImage(img, 0, 0, 300, 300);
             const qrImg = canvas.toDataURL('image/png');
 
-            // QR section
-            const qrY = y;
+            // Set QR position relative to footer to avoid overlap
+            const footerTop = 270;
+            const qrHeight = 55;
+            const qrY = footerTop - qrHeight - 10; // 10mm gap above footer
+
             doc.setFillColor(248, 248, 248);
-            doc.roundedRect(pw / 2 - 30, qrY, 60, 70, 3, 3, 'F');
+            doc.roundedRect(pw / 2 - 25, qrY, 50, qrHeight, 3, 3, 'F');
             doc.setDrawColor(goldR, goldG, goldB);
             doc.setLineWidth(0.3);
-            doc.roundedRect(pw / 2 - 30, qrY, 60, 70, 3, 3, 'S');
-            doc.addImage(qrImg, 'PNG', pw / 2 - 17, qrY + 5, 34, 34);
+            doc.roundedRect(pw / 2 - 25, qrY, 50, qrHeight, 3, 3, 'S');
+            
+            doc.addImage(qrImg, 'PNG', pw / 2 - 15, qrY + 4, 30, 30);
+            
             doc.setFontSize(7);
             doc.setTextColor(darkR, darkG, darkB);
             doc.setFont('helvetica', 'bold');
-            doc.text('DIGITAL BOARDING PASS', pw / 2, qrY + 47, { align: 'center' });
+            doc.text('DIGITAL BOARDING PASS', pw / 2, qrY + 39, { align: 'center' });
             doc.setFontSize(6);
             doc.setTextColor(140, 140, 140);
             doc.setFont('helvetica', 'normal');
-            doc.text('Show this QR code to your', pw / 2, qrY + 53, { align: 'center' });
-            doc.text('driver for check-in', pw / 2, qrY + 58, { align: 'center' });
+            doc.text('Show this QR code to your driver', pw / 2, qrY + 44, { align: 'center' });
+            doc.text('at the meeting point for check-in', pw / 2, qrY + 48, { align: 'center' });
 
             // ── Footer ──
             const footerY = 275;
