@@ -38,6 +38,12 @@
       .checkerboard-row:nth-child(even) {
         flex-direction: row-reverse;
       }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fadeIn { animation: fadeInUp 1s ease both; }
     </style>
   </head>
   <body>
