@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Compass,
@@ -804,9 +805,125 @@ function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmati
 
 /* ════ STEP 6 — Confirmation ════ */
 function Step6Confirmation({ booking, confirmationData }: any) {
+  const qrRef = useRef<HTMLDivElement>(null);
   if (!confirmationData) return null;
   const { bookingId, driverDetails, safariDetails } = confirmationData;
   const safariType = SAFARI_TYPES.find(t => t.id === booking.safariType);
+  const dateStr = booking.date ? format(booking.date, 'MMMM d, yyyy') : '';
+  const totalPrice = ((safariType?.price || 85) * (booking.visitors?.count || 1)) + ((booking.selectedDrivers?.length || 0) * 80) + ((booking.selectedGuides?.length || 0) > 0 ? 40 : 0);
+
+  // QR code data — encodes all key booking info
+  const qrData = JSON.stringify({
+    id: bookingId,
+    safari: safariType?.title,
+    date: dateStr,
+    time: `${safariDetails?.startTime} – ${safariDetails?.endTime}`,
+    visitors: booking.visitors?.count,
+    jeeps: safariDetails?.totalJeeps,
+    driver: driverDetails?.name,
+    guest: booking.visitors?.fullName,
+    total: `$${totalPrice}`,
+  });
+
+  // Download Receipt as a nicely formatted text file
+  const handleDownloadReceipt = useCallback(() => {
+    const receipt = [
+      '════════════════════════════════════════════',
+      '          YALA360 — SAFARI BOOKING RECEIPT',
+      '════════════════════════════════════════════',
+      '',
+      `  Booking ID:     ${bookingId}`,
+      `  Date:           ${dateStr}`,
+      `  Safari:         ${safariType?.title}`,
+      `  Time:           ${safariDetails?.startTime} – ${safariDetails?.endTime}`,
+      '',
+      '──── VISITOR ────────────────────────────────',
+      `  Name:           ${booking.visitors?.fullName}`,
+      `  Email:          ${booking.visitors?.email}`,
+      `  Phone:          ${booking.visitors?.phone}`,
+      `  Country:        ${booking.visitors?.country}`,
+      `  Visitors:       ${booking.visitors?.count}`,
+      '',
+      '──── SAFARI CREW ────────────────────────────',
+      `  Jeeps:          ${safariDetails?.totalJeeps}`,
+      `  Primary Driver: ${driverDetails?.name}`,
+      `  Vehicle:        ${driverDetails?.vehicleType}`,
+      '',
+      '──── PRICING ────────────────────────────────',
+      `  ${safariType?.title} × ${booking.visitors?.count}:  $${(safariType?.price || 85) * (booking.visitors?.count || 1)}`,
+      `  Jeep Rental × ${booking.selectedDrivers?.length || 0}:     $${(booking.selectedDrivers?.length || 0) * 80}`,
+      booking.selectedGuides?.length > 0 ? '  Pro Guide Service:       $40' : '',
+      '  ─────────────────────────────────────',
+      `  TOTAL:                   $${totalPrice}`,
+      '',
+      `  Payment:        ${booking.paymentMethod === 'online' ? 'Online (Credit/Debit)' : 'On-Site Payment'}`,
+      '',
+      '──── LOCATION ───────────────────────────────',
+      '  Yala National Park, Entrance Gate 1',
+      '  Please arrive 15 minutes early.',
+      '',
+      '════════════════════════════════════════════',
+      '  Thank you for choosing YALA360!',
+      '  For support: info@yala360.com',
+      '════════════════════════════════════════════',
+    ].filter(Boolean).join('\n');
+
+    const blob = new Blob([receipt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `YALA360_Receipt_${bookingId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [bookingId, dateStr, safariType, safariDetails, driverDetails, booking, totalPrice]);
+
+  // Share via Email — opens mailto with pre-filled subject and body
+  const handleShareEmail = useCallback(() => {
+    const subject = encodeURIComponent(`YALA360 Safari Booking Confirmation — ${bookingId}`);
+    const body = encodeURIComponent(
+      `Hi,\n\nHere are the details of my YALA360 safari booking:\n\n` +
+      `🎫 Booking ID: ${bookingId}\n` +
+      `📅 Date: ${dateStr}\n` +
+      `🦁 Safari: ${safariType?.title} (${safariDetails?.startTime} – ${safariDetails?.endTime})\n` +
+      `👥 Visitors: ${booking.visitors?.count}\n` +
+      `🚙 Jeeps: ${safariDetails?.totalJeeps}\n` +
+      `🧑‍✈️ Driver: ${driverDetails?.name} — ${driverDetails?.vehicleType}\n` +
+      `📍 Location: Yala National Park, Entrance Gate 1\n` +
+      `💰 Total: $${totalPrice}\n\n` +
+      `Book your own safari at YALA360!\n`
+    );
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
+  }, [bookingId, dateStr, safariType, safariDetails, driverDetails, booking, totalPrice]);
+
+  // Download QR code as PNG image
+  const handleDownloadQR = useCallback(() => {
+    if (!qrRef.current) return;
+    const svgEl = qrRef.current.querySelector('svg');
+    if (!svgEl) return;
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const canvas = document.createElement('canvas');
+    const size = 400;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const img = new Image();
+    img.onload = () => {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+      const pngUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = `YALA360_QR_${bookingId}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  }, [bookingId]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-10 py-8">
@@ -827,7 +944,7 @@ function Step6Confirmation({ booking, confirmationData }: any) {
           </div>
           <div className="text-right">
             <p className="text-[10px] uppercase tracking-widest text-white/50">Date</p>
-            <p className="serif text-white">{booking.date ? format(booking.date, 'MMMM d, yyyy') : ''}</p>
+            <p className="serif text-white">{dateStr}</p>
           </div>
         </div>
 
@@ -851,32 +968,52 @@ function Step6Confirmation({ booking, confirmationData }: any) {
             </div>
           </div>
 
-          {/* QR Code Area */}
-          <div className="flex flex-col items-center justify-center space-y-4 p-8 border border-dashed" style={{ borderColor: GOLD }}>
-            <div className="bg-gray-100 w-40 h-40 flex items-center justify-center text-gray-400 text-xs text-center p-4">
-              <div>
-                <Compass className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                Digital Boarding Pass
-              </div>
+          {/* QR Code */}
+          <div className="flex flex-col items-center justify-center space-y-4 p-8 border border-dashed rounded-2xl" style={{ borderColor: GOLD, background: 'rgba(197,160,89,0.03)' }}>
+            <div ref={qrRef} className="bg-white p-4 rounded-xl shadow-md">
+              <QRCodeSVG
+                value={qrData}
+                size={160}
+                bgColor="#ffffff"
+                fgColor="#1A1A1A"
+                level="H"
+                includeMargin={false}
+              />
             </div>
-            <p className="text-xs text-center text-gray-400 font-light">Show this to your driver at the meeting point for check-in.</p>
+            <div className="text-center space-y-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-700">Digital Boarding Pass</p>
+              <p className="text-[10px] text-gray-400">Show this QR code to your driver at the meeting point for check-in.</p>
+            </div>
+            <button
+              onClick={handleDownloadQR}
+              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2 border rounded-lg transition-all hover:shadow-md"
+              style={{ borderColor: GOLD, color: GOLD }}
+            >
+              <Download className="w-3 h-3" /> Download QR Code
+            </button>
           </div>
         </div>
 
         {/* Action Bar */}
-        <div className="p-6 border-t border-gray-100 flex flex-wrap gap-4 justify-center" style={{ background: 'rgba(197,160,89,0.05)' }}>
-          <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-gold transition-colors">
+        <div className="p-6 border-t border-gray-100 flex flex-wrap gap-6 justify-center" style={{ background: 'rgba(197,160,89,0.05)' }}>
+          <button
+            onClick={handleDownloadReceipt}
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-100"
+          >
             <Download className="w-4 h-4" /> Download Receipt
           </button>
-          <div className="w-[1px] h-4 bg-gray-200" />
-          <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-gold transition-colors">
+          <div className="w-[1px] h-8 bg-gray-200 self-center" />
+          <button
+            onClick={handleShareEmail}
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-100"
+          >
             <Share2 className="w-4 h-4" /> Share via Email
           </button>
         </div>
       </div>
 
       <div className="flex justify-center">
-        <button onClick={() => window.location.reload()} className="px-10 py-4 border font-bold uppercase tracking-widest text-sm hover:text-white transition-all" style={{ borderColor: GOLD, color: GOLD }} onMouseEnter={e => { (e.target as HTMLElement).style.background = GOLD; (e.target as HTMLElement).style.color = 'white'; }} onMouseLeave={e => { (e.target as HTMLElement).style.background = ''; (e.target as HTMLElement).style.color = GOLD; }}>
+        <button onClick={() => window.location.reload()} className="px-10 py-4 border font-bold uppercase tracking-widest text-sm hover:text-white transition-all rounded-lg" style={{ borderColor: GOLD, color: GOLD }} onMouseEnter={e => { (e.target as HTMLElement).style.background = GOLD; (e.target as HTMLElement).style.color = 'white'; }} onMouseLeave={e => { (e.target as HTMLElement).style.background = ''; (e.target as HTMLElement).style.color = GOLD; }}>
           Book Another Safari
         </button>
       </div>
