@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { jsPDF } from 'jspdf';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Compass,
   Calendar,
   Users,
   Truck,
@@ -806,8 +806,7 @@ function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmati
 /* ════ STEP 6 — Confirmation ════ */
 function Step6Confirmation({ booking, confirmationData }: any) {
   const qrRef = useRef<HTMLDivElement>(null);
-  if (!confirmationData) return null;
-  const { bookingId, driverDetails, safariDetails } = confirmationData;
+  const { bookingId, driverDetails, safariDetails } = confirmationData || {};
   const safariType = SAFARI_TYPES.find(t => t.id === booking.safariType);
   const dateStr = booking.date ? format(booking.date, 'MMMM d, yyyy') : '';
   const totalPrice = ((safariType?.price || 85) * (booking.visitors?.count || 1)) + ((booking.selectedDrivers?.length || 0) * 80) + ((booking.selectedGuides?.length || 0) > 0 ? 40 : 0);
@@ -825,58 +824,249 @@ function Step6Confirmation({ booking, confirmationData }: any) {
     total: `$${totalPrice}`,
   });
 
-  // Download Receipt as a nicely formatted text file
+  // Download Receipt as a beautifully styled PDF
   const handleDownloadReceipt = useCallback(() => {
-    const receipt = [
-      '════════════════════════════════════════════',
-      '          YALA360 — SAFARI BOOKING RECEIPT',
-      '════════════════════════════════════════════',
-      '',
-      `  Booking ID:     ${bookingId}`,
-      `  Date:           ${dateStr}`,
-      `  Safari:         ${safariType?.title}`,
-      `  Time:           ${safariDetails?.startTime} – ${safariDetails?.endTime}`,
-      '',
-      '──── VISITOR ────────────────────────────────',
-      `  Name:           ${booking.visitors?.fullName}`,
-      `  Email:          ${booking.visitors?.email}`,
-      `  Phone:          ${booking.visitors?.phone}`,
-      `  Country:        ${booking.visitors?.country}`,
-      `  Visitors:       ${booking.visitors?.count}`,
-      '',
-      '──── SAFARI CREW ────────────────────────────',
-      `  Jeeps:          ${safariDetails?.totalJeeps}`,
-      `  Primary Driver: ${driverDetails?.name}`,
-      `  Vehicle:        ${driverDetails?.vehicleType}`,
-      '',
-      '──── PRICING ────────────────────────────────',
-      `  ${safariType?.title} × ${booking.visitors?.count}:  $${(safariType?.price || 85) * (booking.visitors?.count || 1)}`,
-      `  Jeep Rental × ${booking.selectedDrivers?.length || 0}:     $${(booking.selectedDrivers?.length || 0) * 80}`,
-      booking.selectedGuides?.length > 0 ? '  Pro Guide Service:       $40' : '',
-      '  ─────────────────────────────────────',
-      `  TOTAL:                   $${totalPrice}`,
-      '',
-      `  Payment:        ${booking.paymentMethod === 'online' ? 'Online (Credit/Debit)' : 'On-Site Payment'}`,
-      '',
-      '──── LOCATION ───────────────────────────────',
-      '  Yala National Park, Entrance Gate 1',
-      '  Please arrive 15 minutes early.',
-      '',
-      '════════════════════════════════════════════',
-      '  Thank you for choosing YALA360!',
-      '  For support: info@yala360.com',
-      '════════════════════════════════════════════',
-    ].filter(Boolean).join('\n');
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pw = doc.internal.pageSize.getWidth();
+    const goldR = 197, goldG = 160, goldB = 89;
+    const darkR = 26, darkG = 26, darkB = 26;
+    let y = 0;
 
-    const blob = new Blob([receipt], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `YALA360_Receipt_${bookingId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // ── Dark header band ──
+    doc.setFillColor(darkR, darkG, darkB);
+    doc.rect(0, 0, pw, 52, 'F');
+
+    // Gold accent line
+    doc.setFillColor(goldR, goldG, goldB);
+    doc.rect(0, 52, pw, 1.5, 'F');
+
+    // YALA360 logo text
+    doc.setTextColor(goldR, goldG, goldB);
+    doc.setFontSize(28);
+    doc.setFont('helvetica', 'bold');
+    doc.text('YALA360', 20, 22);
+
+    // Subtitle
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'normal');
+    doc.text('LUXURY SAFARI EXPERIENCE', 20, 30);
+
+    // Receipt title right side
+    doc.setFontSize(11);
+    doc.setTextColor(goldR, goldG, goldB);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BOOKING RECEIPT', pw - 20, 20, { align: 'right' });
+
+    // Booking ID right
+    doc.setFontSize(14);
+    doc.setTextColor(255, 255, 255);
+    doc.text(bookingId, pw - 20, 30, { align: 'right' });
+
+    // Date right
+    doc.setFontSize(8);
+    doc.setTextColor(180, 180, 180);
+    doc.text(dateStr, pw - 20, 38, { align: 'right' });
+
+    // Payment status badge
+    doc.setFontSize(7);
+    const badgeText = booking.paymentMethod === 'online' ? 'PAID ONLINE' : 'PAY ON SITE';
+    const badgeW = doc.getTextWidth(badgeText) + 8;
+    doc.setFillColor(goldR, goldG, goldB);
+    doc.roundedRect(pw - 20 - badgeW, 42, badgeW, 6, 1, 1, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text(badgeText, pw - 20 - badgeW / 2, 46.2, { align: 'center' });
+
+    y = 62;
+
+    // ── Helper: section header ──
+    const drawSectionHeader = (title: string, yPos: number) => {
+      doc.setFillColor(goldR, goldG, goldB);
+      doc.rect(20, yPos, 3, 6, 'F');
+      doc.setFontSize(9);
+      doc.setTextColor(goldR, goldG, goldB);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title.toUpperCase(), 26, yPos + 4.5);
+      doc.setDrawColor(230, 230, 230);
+      doc.line(26 + doc.getTextWidth(title.toUpperCase()) + 3, yPos + 3, pw - 20, yPos + 3);
+      return yPos + 12;
+    };
+
+    // ── Helper: label + value row ──
+    const drawRow = (label: string, value: string, yPos: number) => {
+      doc.setFontSize(8.5);
+      doc.setTextColor(140, 140, 140);
+      doc.setFont('helvetica', 'normal');
+      doc.text(label, 26, yPos);
+      doc.setTextColor(darkR, darkG, darkB);
+      doc.setFont('helvetica', 'bold');
+      doc.text(value, 80, yPos);
+      return yPos + 7;
+    };
+
+    // ── Safari Details Section ──
+    y = drawSectionHeader('Safari Details', y);
+    y = drawRow('Safari Type', safariType?.title || '', y);
+    y = drawRow('Time', `${safariDetails?.startTime || ''} - ${safariDetails?.endTime || ''}`, y);
+    y = drawRow('Location', 'Yala National Park, Entrance Gate 1', y);
+    y += 4;
+
+    // ── Visitor Details Section ──
+    y = drawSectionHeader('Visitor Information', y);
+    y = drawRow('Full Name', booking.visitors?.fullName || '', y);
+    y = drawRow('Email', booking.visitors?.email || '', y);
+    y = drawRow('Phone', booking.visitors?.phone || '', y);
+    y = drawRow('Country', booking.visitors?.country || '', y);
+    y = drawRow('Visitors', String(booking.visitors?.count || 1), y);
+    if (booking.visitors?.specialRequests) {
+      y = drawRow('Special Requests', booking.visitors.specialRequests, y);
+    }
+    y += 4;
+
+    // ── Safari Crew Section ──
+    y = drawSectionHeader('Safari Crew', y);
+    y = drawRow('Total Jeeps', String(safariDetails?.totalJeeps || 1), y);
+    y = drawRow('Primary Driver', driverDetails?.name || '', y);
+    y = drawRow('Vehicle', driverDetails?.vehicleType || '', y);
+    if (booking.selectedGuides?.length > 0) {
+      y = drawRow('Wildlife Guide', 'Professional Guide Assigned', y);
+    }
+    y += 6;
+
+    // ── Pricing Table ──
+    y = drawSectionHeader('Price Breakdown', y);
+    // Table header
+    doc.setFillColor(248, 248, 248);
+    doc.rect(26, y - 2, pw - 46, 8, 'F');
+    doc.setFontSize(7);
+    doc.setTextColor(140, 140, 140);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ITEM', 30, y + 3);
+    doc.text('AMOUNT', pw - 24, y + 3, { align: 'right' });
+    y += 10;
+
+    // Price rows
+    const safariTotal = (safariType?.price || 85) * (booking.visitors?.count || 1);
+    const jeepTotal = (booking.selectedDrivers?.length || 0) * 80;
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(80, 80, 80);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${safariType?.title} x ${booking.visitors?.count || 1}`, 30, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`$${safariTotal}.00`, pw - 24, y, { align: 'right' });
+    y += 7;
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Jeep Rental x ${booking.selectedDrivers?.length || 0}`, 30, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`$${jeepTotal}.00`, pw - 24, y, { align: 'right' });
+    y += 7;
+
+    if (booking.selectedGuides?.length > 0) {
+      doc.setFont('helvetica', 'normal');
+      doc.text('Professional Guide Service', 30, y);
+      doc.setFont('helvetica', 'bold');
+      doc.text('$40.00', pw - 24, y, { align: 'right' });
+      y += 7;
+    }
+
+    // Total line
+    doc.setDrawColor(goldR, goldG, goldB);
+    doc.setLineWidth(0.5);
+    doc.line(26, y, pw - 20, y);
+    y += 8;
+    doc.setFontSize(11);
+    doc.setTextColor(darkR, darkG, darkB);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TOTAL', 30, y);
+    doc.setTextColor(goldR, goldG, goldB);
+    doc.setFontSize(14);
+    doc.text(`$${totalPrice}.00`, pw - 24, y, { align: 'right' });
+    y += 12;
+
+    // ── QR Code embed ──
+    if (qrRef.current) {
+      const svgEl = qrRef.current.querySelector('svg');
+      if (svgEl) {
+        const svgData = new XMLSerializer().serializeToString(svgEl);
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const img = new Image();
+          img.onload = () => {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 300, 300);
+            ctx.drawImage(img, 0, 0, 300, 300);
+            const qrImg = canvas.toDataURL('image/png');
+
+            // QR section
+            const qrY = y;
+            doc.setFillColor(248, 248, 248);
+            doc.roundedRect(pw / 2 - 30, qrY, 60, 70, 3, 3, 'F');
+            doc.setDrawColor(goldR, goldG, goldB);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(pw / 2 - 30, qrY, 60, 70, 3, 3, 'S');
+            doc.addImage(qrImg, 'PNG', pw / 2 - 17, qrY + 5, 34, 34);
+            doc.setFontSize(7);
+            doc.setTextColor(darkR, darkG, darkB);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DIGITAL BOARDING PASS', pw / 2, qrY + 47, { align: 'center' });
+            doc.setFontSize(6);
+            doc.setTextColor(140, 140, 140);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Show this QR code to your', pw / 2, qrY + 53, { align: 'center' });
+            doc.text('driver for check-in', pw / 2, qrY + 58, { align: 'center' });
+
+            // ── Footer ──
+            const footerY = 275;
+            doc.setFillColor(darkR, darkG, darkB);
+            doc.rect(0, footerY - 5, pw, 25, 'F');
+            doc.setFillColor(goldR, goldG, goldB);
+            doc.rect(0, footerY - 5, pw, 1, 'F');
+
+            doc.setFontSize(8);
+            doc.setTextColor(goldR, goldG, goldB);
+            doc.setFont('helvetica', 'bold');
+            doc.text('YALA360', 20, footerY + 3);
+            doc.setFontSize(6);
+            doc.setTextColor(180, 180, 180);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Elevating the Sri Lankan safari experience', 20, footerY + 8);
+            doc.text('through technology and luxury.', 20, footerY + 12);
+
+            doc.setFontSize(6);
+            doc.setTextColor(180, 180, 180);
+            doc.text('info@yala360.com  |  +94 (0) 77 123 4567', pw - 20, footerY + 3, { align: 'right' });
+            doc.text('www.yala360.com', pw - 20, footerY + 8, { align: 'right' });
+
+            // Save
+            doc.save(`YALA360_Receipt_${bookingId}.pdf`);
+          };
+          img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+          return; // wait for img.onload
+        }
+      }
+    }
+
+    // Fallback if QR can't be embedded
+    const footerY = 275;
+    doc.setFillColor(darkR, darkG, darkB);
+    doc.rect(0, footerY - 5, pw, 25, 'F');
+    doc.setFillColor(goldR, goldG, goldB);
+    doc.rect(0, footerY - 5, pw, 1, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(goldR, goldG, goldB);
+    doc.setFont('helvetica', 'bold');
+    doc.text('YALA360', 20, footerY + 3);
+    doc.setFontSize(6);
+    doc.setTextColor(180, 180, 180);
+    doc.setFont('helvetica', 'normal');
+    doc.text('info@yala360.com  |  +94 (0) 77 123 4567', pw - 20, footerY + 3, { align: 'right' });
+    doc.save(`YALA360_Receipt_${bookingId}.pdf`);
   }, [bookingId, dateStr, safariType, safariDetails, driverDetails, booking, totalPrice]);
 
   // Share via Email — opens mailto with pre-filled subject and body
@@ -924,6 +1114,8 @@ function Step6Confirmation({ booking, confirmationData }: any) {
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   }, [bookingId]);
+
+  if (!confirmationData) return null;
 
   return (
     <div className="max-w-3xl mx-auto space-y-10 py-8">
