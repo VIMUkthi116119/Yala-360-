@@ -1003,33 +1003,32 @@ function Step6Confirmation({ booking, confirmationData }: any) {
             ctx.drawImage(img, 0, 0, 300, 300);
             const qrImg = canvas.toDataURL('image/png');
 
-            // Position QR code below 'TOTAL' but above the footer
-            const footerTop = 270;
-            const qrHeight = 55;
-            
-            // start at y + 10, but don't let it overlap footer
-            let qrY = Math.max(y + 10, 200); // at least 200mm down if y is small
-            if (qrY + qrHeight > footerTop - 5) {
-              qrY = footerTop - qrHeight - 5; // stick it to just above footer
-            }
+            // Position QR code in the top-right corner below the header
+            const qrWidth = 45;
+            const qrHeight = 52;
+            const qrX = pw - 20 - qrWidth; // Right align with margin
+            const qrY = 65;
 
+            // Pass container
             doc.setFillColor(248, 248, 248);
-            doc.roundedRect(pw / 2 - 25, qrY, 50, qrHeight, 3, 3, 'F');
+            doc.roundedRect(qrX, qrY, qrWidth, qrHeight, 2, 2, 'F');
             doc.setDrawColor(goldR, goldG, goldB);
             doc.setLineWidth(0.3);
-            doc.roundedRect(pw / 2 - 25, qrY, 50, qrHeight, 3, 3, 'S');
+            doc.roundedRect(qrX, qrY, qrWidth, qrHeight, 2, 2, 'S');
             
-            doc.addImage(qrImg, 'PNG', pw / 2 - 15, qrY + 4, 30, 30);
+            // QR Image
+            doc.addImage(qrImg, 'PNG', qrX + (qrWidth - 30) / 2, qrY + 4, 30, 30);
             
+            // Text below QR
             doc.setFontSize(7);
             doc.setTextColor(darkR, darkG, darkB);
             doc.setFont('helvetica', 'bold');
-            doc.text('DIGITAL BOARDING PASS', pw / 2, qrY + 39, { align: 'center' });
+            doc.text('PASS: ' + bookingId, qrX + qrWidth / 2, qrY + 39, { align: 'center' });
             doc.setFontSize(6);
             doc.setTextColor(140, 140, 140);
             doc.setFont('helvetica', 'normal');
-            doc.text('Show this QR code to your driver', pw / 2, qrY + 44, { align: 'center' });
-            doc.text('at the meeting point for check-in', pw / 2, qrY + 48, { align: 'center' });
+            doc.text('DIGITAL BOARDING PASS', qrX + qrWidth / 2, qrY + 44, { align: 'center' });
+            doc.text('Show this for check-in', qrX + qrWidth / 2, qrY + 48, { align: 'center' });
 
             // ── Footer ──
             const footerY = 275;
