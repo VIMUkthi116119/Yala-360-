@@ -2,25 +2,31 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Bookings ───────────────────────────────────────────
-    // Anyone logged in can CREATE a booking (tourist books safari)
-    // Only admins can READ ALL bookings / UPDATE / DELETE
-    match /bookings/{bookingId} {
-      // Tourist can create their own booking
-      allow create: if request.auth != null;
-
-      // Any authenticated user can read their own booking (by matching email/userId)
+    // ── Admins collection ─────────────────────────────────
+    // Only currently active admins can read or write admin docs.
+    // You can manage this from the Firebase Console.
+    match /admins/{email} {
+      // Any authenticated user can read (to check their own admin status)
       allow read: if request.auth != null;
-
-      // Only admins (specific emails) can update/delete bookings
-      allow update, delete: if request.auth != null &&
-        request.auth.token.email in [
-          'vimukthiubeysekera@gmail.com',
-          'admin@yala360.com'
-        ];
+      // Only existing active admins can add/remove/edit admin records
+      allow write: if request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data.active == true;
     }
 
-    // ── All other collections (deny by default) ────────────
+    // ── Bookings ──────────────────────────────────────────
+    // Any logged-in user can create a booking
+    // Any logged-in user can read bookings (admin checks happen in app logic)
+    // Only admins can update/delete
+    match /bookings/{bookingId} {
+      allow create: if request.auth != null;
+      allow read:   if request.auth != null;
+      allow update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data.active == true;
+    }
+
+    // ── Everything else ───────────────────────────────────
     match /{document=**} {
       allow read, write: if request.auth != null;
     }

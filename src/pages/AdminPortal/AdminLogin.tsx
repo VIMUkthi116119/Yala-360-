@@ -5,7 +5,8 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../../firebase';
 import { LogIn, Shield, Eye, EyeOff } from 'lucide-react';
-import { isAdminEmail } from '../../config/adminConfig';
+import { isAdminInFirestore } from '../../services/adminService';
+
 
 
 const GOLD = '#C5A059';
@@ -27,7 +28,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      if (!isAdminEmail(cred.user.email)) {
+      const adminOk = await isAdminInFirestore(cred.user.email);
+      if (!adminOk) {
         await auth.signOut();
         setError('Access denied. This portal is for admins only.');
       } else {
@@ -53,7 +55,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     try {
       const cred = await signInWithPopup(auth, googleProvider);
-      if (!isAdminEmail(cred.user.email)) {
+      const adminOk = await isAdminInFirestore(cred.user.email);
+      if (!adminOk) {
         await auth.signOut();
         setError('Access denied. This account is not an admin.');
       } else {
