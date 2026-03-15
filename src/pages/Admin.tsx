@@ -2,13 +2,8 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AdminApp from './AdminPortal/App';
 import AdminLogin from './AdminPortal/AdminLogin';
+import { isAdminEmail } from '../config/adminConfig';
 
-// Emails allowed to use the admin portal
-const ADMIN_EMAILS = [
-  'vimukthiubeysekera@gmail.com',
-  'admin@yala360.com',
-  'vimukthi116119@gmail.com',
-];
 
 const Admin: React.FC = () => {
   const { currentUser, loading } = useAuth();
@@ -23,7 +18,7 @@ const Admin: React.FC = () => {
   }
 
   // If not logged in, or not an admin — show the admin login form
-  const isAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email || '');
+  const isAdmin = currentUser && isAdminEmail(currentUser.email);
 
   if (!isAdmin) {
     return (

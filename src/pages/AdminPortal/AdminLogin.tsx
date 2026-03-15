@@ -5,13 +5,8 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '../../firebase';
 import { LogIn, Shield, Eye, EyeOff } from 'lucide-react';
+import { isAdminEmail } from '../../config/adminConfig';
 
-// Admin emails list — only these accounts can see the admin portal
-const ADMIN_EMAILS = [
-  'vimukthiubeysekera@gmail.com',
-  'admin@yala360.com',
-  'vimukthi116119@gmail.com',
-];
 
 const GOLD = '#C5A059';
 
@@ -32,7 +27,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      if (!ADMIN_EMAILS.includes(cred.user.email || '')) {
+      if (!isAdminEmail(cred.user.email)) {
         await auth.signOut();
         setError('Access denied. This portal is for admins only.');
       } else {
@@ -58,7 +53,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
     setLoading(true);
     try {
       const cred = await signInWithPopup(auth, googleProvider);
-      if (!ADMIN_EMAILS.includes(cred.user.email || '')) {
+      if (!isAdminEmail(cred.user.email)) {
         await auth.signOut();
         setError('Access denied. This account is not an admin.');
       } else {
