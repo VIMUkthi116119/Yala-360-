@@ -129,7 +129,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-safari-dark overflow-hidden font-sans">
+    <div className="flex h-full bg-safari-dark overflow-hidden font-sans">
       {/* Sidebar */}
       <motion.aside 
         initial={false}
