@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { SafariType } from '../types';
+import { getUserLatestBooking } from '../services/firebaseBooking';
 
 interface Review {
   id: string;
@@ -89,12 +90,22 @@ const Reviews: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleOpenModal = () => {
+  const handleOpenModal = async () => {
     if (!currentUser) {
       alert("Please sign in or create an account to write a review!");
       return;
     }
     setShowModal(true);
+    
+    // Auto-fill booking ID if available
+    try {
+      const latestBookingId = await getUserLatestBooking(currentUser.email);
+      if (latestBookingId) {
+        setNewReview(prev => ({ ...prev, bookingId: latestBookingId }));
+      }
+    } catch (err) {
+      console.error("Failed to fetch latest booking ID:", err);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

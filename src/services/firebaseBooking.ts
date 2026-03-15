@@ -35,7 +35,7 @@ export interface FirestoreBooking {
   driverName?: string;
   vehicleType?: string;
   specialRequests?: string;
-  createdAt?: any;
+  createdAt?: unknown; // Could be FieldValue or Timestamp
   userId?: string;
 }
 
@@ -92,4 +92,31 @@ export async function cancelBooking(docId: string): Promise<void> {
 /** Delete booking (admin) */
 export async function deleteBooking(docId: string): Promise<void> {
   await deleteDoc(doc(db, BOOKINGS_COLLECTION, docId));
+}
+
+/** Get the latest booking ID for a specific user email */
+export async function getUserLatestBooking(email?: string | null): Promise<string | null> {
+  if (!email) return null;
+  try {
+    const q = query(
+      collection(db, BOOKINGS_COLLECTION),
+      where('email', '==', email)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    
+    // Sort client-side to avoid needing a composite index
+    const docsData = snap.docs.map(d => d.data() as FirestoreBooking);
+    docsData.sort((a, b) => {
+      type TimestampLike = { toMillis?: () => number };
+      const timeA = ((a.createdAt as unknown) as TimestampLike)?.toMillis?.() || 0;
+      const timeB = ((b.createdAt as unknown) as TimestampLike)?.toMillis?.() || 0;
+      return timeB - timeA;
+    });
+    
+    return docsData[0].bookingId || null;
+  } catch (err) {
+    console.error('Error fetching latest booking:', err);
+    return null;
+  }
 }

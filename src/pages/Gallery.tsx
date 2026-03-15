@@ -6,6 +6,7 @@ import { Upload, Camera, Search, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { getUserLatestBooking } from '../services/firebaseBooking';
 
 const compressImage = (file: File): Promise<string> => {
   return new Promise((resolve) => {
@@ -122,13 +123,22 @@ const Gallery: React.FC = () => {
     }
   };
 
-  const handleUploadClick = () => {
+  const handleUploadClick = async () => {
     if (!currentUser) {
       alert("Please sign in or create an account to share your experience!");
       navigate('/login');
       return;
     }
     setShowUpload(true);
+    
+    try {
+      const latestBookingId = await getUserLatestBooking(currentUser.email);
+      if (latestBookingId) {
+        setBookingId(latestBookingId);
+      }
+    } catch (err) {
+      console.error("Failed to fetch latest booking ID:", err);
+    }
   };
 
   const handleUpload = async () => {
