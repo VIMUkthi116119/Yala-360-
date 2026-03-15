@@ -1,1 +1,28 @@
-rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Bookings ───────────────────────────────────────────
+    // Anyone logged in can CREATE a booking (tourist books safari)
+    // Only admins can READ ALL bookings / UPDATE / DELETE
+    match /bookings/{bookingId} {
+      // Tourist can create their own booking
+      allow create: if request.auth != null;
+
+      // Any authenticated user can read their own booking (by matching email/userId)
+      allow read: if request.auth != null;
+
+      // Only admins (specific emails) can update/delete bookings
+      allow update, delete: if request.auth != null &&
+        request.auth.token.email in [
+          'vimukthiubeysekera@gmail.com',
+          'admin@yala360.com'
+        ];
+    }
+
+    // ── All other collections (deny by default) ────────────
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

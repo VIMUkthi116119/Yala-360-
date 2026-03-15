@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
 import { motion, AnimatePresence } from 'framer-motion';
+import { saveBooking } from '../services/firebaseBooking';
+import { format as formatDate } from 'date-fns';
 import {
   Calendar,
   Users,
@@ -686,16 +688,46 @@ function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmati
   const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    // Simulate processing
-    await new Promise(r => setTimeout(r, 1500));
-    const bookingId = `Y360-${Math.floor(Math.random() * 90000 + 10000)}`;
-    setConfirmationData({
-      bookingId,
-      driverDetails: MOCK_DRIVERS.find(d => d.id === booking.selectedDrivers[0]) || MOCK_DRIVERS[0],
-      safariDetails: { startTime: safariType?.timeRange.split(' – ')[0], endTime: safariType?.timeRange.split(' – ')[1], totalJeeps: booking.selectedDrivers.length },
-    });
-    setIsProcessing(false);
-    onNext();
+    try {
+      await new Promise(r => setTimeout(r, 1000));
+      const bookingId = `Y360-${Math.floor(Math.random() * 90000 + 10000)}`;
+      const driverDetails = MOCK_DRIVERS.find(d => d.id === booking.selectedDrivers[0]) || MOCK_DRIVERS[0];
+      const safariDetails = {
+        startTime: safariType?.timeRange.split(' – ')[0],
+        endTime: safariType?.timeRange.split(' – ')[1],
+        totalJeeps: booking.selectedDrivers.length,
+      };
+
+      // Save to Firebase Firestore
+      await saveBooking({
+        bookingId,
+        touristName: booking.visitors?.fullName || '',
+        email: booking.visitors?.email || '',
+        phone: booking.visitors?.phone || '',
+        country: booking.visitors?.country || '',
+        safariType: booking.safariType || '',
+        safariTitle: safariType?.title || '',
+        date: booking.date ? formatDate(booking.date, 'yyyy-MM-dd') : '',
+        visitors: booking.visitors?.count || 1,
+        driverIds: booking.selectedDrivers || [],
+        guideIds: booking.selectedGuides || [],
+        paymentMethod: booking.paymentMethod || 'onsite',
+        paymentStatus: booking.paymentMethod === 'online' ? 'Paid' : 'Pending',
+        status: 'Confirmed',
+        totalPrice,
+        driverName: driverDetails.name,
+        vehicleType: driverDetails.vehicleType,
+        specialRequests: booking.visitors?.specialRequests || '',
+      });
+
+      setConfirmationData({ bookingId, driverDetails, safariDetails });
+      onNext();
+    } catch (err) {
+      console.error('Booking save error:', err);
+      alert('Booking failed to save. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (

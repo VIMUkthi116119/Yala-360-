@@ -1,4 +1,3 @@
-
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -13,6 +12,7 @@ import ProfilePage from './pages/ProfilePage';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 
 function App() {
   return (
@@ -29,7 +29,14 @@ function App() {
             <Route path="/rankings" element={<Rankings />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedAdminRoute>
+                  <Admin />
+                </ProtectedAdminRoute>
+              }
+            />
             <Route path="/login" element={<Login />} />
           </Routes>
         </Layout>
