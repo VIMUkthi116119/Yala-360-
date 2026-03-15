@@ -1,16 +1,22 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import Home from './pages/Home';
-import About from './pages/About';
-import Booking from './pages/Booking';
-import MapPage from './pages/Map';
-import Gallery from './pages/Gallery';
-import Reviews from './pages/Reviews';
-import Rankings from './pages/Rankings';
-import Contact from './pages/Contact';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Pages
+import Home        from './pages/Home';
+import About       from './pages/About';
+import Contact     from './pages/Contact';
+import Login       from './pages/Login';
+import Admin       from './pages/Admin';
+
+// Protected pages (require login)
+import Booking     from './pages/Booking';
+import MapPage     from './pages/Map';
+import Gallery     from './pages/Gallery';
+import Reviews     from './pages/Reviews';
+import Rankings    from './pages/Rankings';
 import ProfilePage from './pages/ProfilePage';
-import Admin from './pages/Admin';
-import Login from './pages/Login';
+
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
@@ -19,17 +25,34 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/booking" element={<Booking />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/rankings" element={<Rankings />} />
+            {/* ── Public pages ─────────────────────────── */}
+            <Route path="/"       element={<Home />} />
+            <Route path="/about"  element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login"  element={<Login />} />
+
+            {/* ── Admin (has its own built-in auth) ──── */}
+            <Route path="/admin"  element={<Admin />} />
+
+            {/* ── Protected pages (login required) ──── */}
+            <Route path="/booking" element={
+              <ProtectedRoute><Booking /></ProtectedRoute>
+            } />
+            <Route path="/map" element={
+              <ProtectedRoute><MapPage /></ProtectedRoute>
+            } />
+            <Route path="/gallery" element={
+              <ProtectedRoute><Gallery /></ProtectedRoute>
+            } />
+            <Route path="/reviews" element={
+              <ProtectedRoute><Reviews /></ProtectedRoute>
+            } />
+            <Route path="/rankings" element={
+              <ProtectedRoute><Rankings /></ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute><ProfilePage /></ProtectedRoute>
+            } />
           </Routes>
         </Layout>
       </Router>
