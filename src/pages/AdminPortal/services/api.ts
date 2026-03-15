@@ -17,7 +17,7 @@ export const api = {
     return {
       totalBookingsToday: MOCK_BOOKINGS.length,
       totalVisitorsToday: MOCK_BOOKINGS.reduce((acc, b) => acc + b.visitors, 0),
-      activeSafaris: MOCK_BOOKINGS.filter((b) => b.status === 'On Safari').length,
+      activeSafaris: MOCK_BOOKINGS.filter((b) => (b.status as string) === 'On Safari' || b.status === "Confirmed").length,
       driversOnSafari: MOCK_DRIVERS.filter((d) => d.status === 'On Safari').length,
       driversAvailable: MOCK_DRIVERS.filter((d) => d.status === 'Available').length,
       averageParkDensity: 65,
@@ -50,7 +50,8 @@ export const api = {
   getBookings: async (params: { page?: number; limit?: number; search?: string; safariType?: string; date?: string }) => {
     return {
       bookings: MOCK_BOOKINGS,
-      totalPages: 1
+      totalPages: 1,
+      total: MOCK_BOOKINGS.length
     };
   },
 
@@ -63,12 +64,12 @@ export const api = {
   },
 
   autoReassignDriver: async (bookingId: string) => {
-    return { success: true, newDriverId: MOCK_DRIVERS[0].id };
+    return { success: true, message: 'Driver auto-reassigned', newDriverId: MOCK_DRIVERS[0].id };
   },
 
   // Drivers
   getDrivers: async () => {
-    return MOCK_DRIVERS;
+    return { drivers: MOCK_DRIVERS };
   },
 
   removeDriver: async (id: string) => {
@@ -85,7 +86,7 @@ export const api = {
 
   // Guides
   getGuides: async () => {
-    return MOCK_GUIDES;
+    return { guides: MOCK_GUIDES };
   },
 
   removeGuide: async (id: string) => {
@@ -95,8 +96,7 @@ export const api = {
   // Rankings
   getRankings: async () => {
     return {
-      topDrivers: MOCK_DRIVERS.slice(0, 3),
-      topGuides: MOCK_GUIDES.slice(0, 3)
+      rankings: MOCK_DRIVERS.map(d => ({ ...d, rankingScore: d.score })).sort((a, b) => b.rankingScore - a.rankingScore)
     };
   },
 
@@ -109,7 +109,7 @@ export const api = {
 
   // Reviews
   getReviews: async () => {
-    return MOCK_REVIEWS;
+    return { reviews: MOCK_REVIEWS };
   },
 
   approveReview: async (id: string) => {
@@ -126,9 +126,11 @@ export const api = {
 
   // Notifications
   getTourists: async (search?: string) => {
-    return [
-      { id: 'T-001', name: 'John Doe', phone: '+123456789' }
-    ];
+    return {
+      tourists: [
+        { id: 'T-001', name: 'John Doe', phone: '+123456789' }
+      ]
+    };
   },
 
   sendNotification: async (data: any) => {
@@ -137,26 +139,29 @@ export const api = {
 
   // System
   clearCache: async () => {
-    return { success: true };
+    return { success: true, message: 'System cache cleared successfully' };
   },
 
   // Settings
   getSettings: async () => {
     return {
-      autoAssignDrivers: true,
-      maxJeepsPerDay: 200,
-      baseTicketPrice: 50,
-      platformFeePercentage: 10
+      settings: {
+        maxJeepsPerSlot: 50,
+        platformFee: 15,
+        openingTime: '06:00',
+        closingTime: '18:00',
+        maintenanceMode: false
+      }
     };
   },
 
   updateSettings: async (settings: any) => {
-    return { success: true, settings };
+    return { success: true, message: 'Settings saved', settings };
   },
 
   // Gallery
   getGallery: async () => {
-    return [];
+    return { images: [] };
   },
 
   addGalleryImage: async (data: { url: string; title?: string }) => {
@@ -169,7 +174,7 @@ export const api = {
 
   // Map Management
   getMapLocations: async (params: { type?: string; search?: string; status?: string } = {}) => {
-    return [];
+    return { locations: [] };
   },
 
   addMapLocation: async (data: any) => {
@@ -186,7 +191,7 @@ export const api = {
 
   // Animal Sightings
   getAnimalSightings: async () => {
-    return [];
+    return { sightings: [] };
   },
 
   updateAnimalSighting: async (id: string, data: any) => {
