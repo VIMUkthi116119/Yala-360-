@@ -73,7 +73,7 @@ export default function Home() {
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
         {/* bg */}
         <img
-          src="https://picsum.photos/seed/yaleleopard/1920/1080"
+          src="https://images.unsplash.com/photo-1566650576880-6740b03eaad1?auto=format&fit=crop&q=80&w=1920&h=1080"
           alt="Yala Wildlife"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -153,7 +153,7 @@ export default function Home() {
           <Reveal from="left">
             <div className="h-[500px] lg:h-full min-h-[500px] overflow-hidden relative">
               <img
-                src="https://picsum.photos/seed/safariguide/900/700"
+                src="https://images.unsplash.com/photo-1544979590-37e9b47eb705?auto=format&fit=crop&q=80&w=900&h=700"
                 alt="Safari Guide"
                 className="w-full h-full object-cover"
               />
@@ -235,7 +235,7 @@ export default function Home() {
             { title: 'Explore Wildlife',   sub: 'Real-time sightings map',      img: 'wildlife1',   link: '/map',      Icon: Compass   },
             { title: 'Hotels Nearby',      sub: 'Curated luxury stays',         img: 'hotel1',      link: '/about',    Icon: MapPin    },
             { title: 'View Gallery',       sub: 'Photos from our community',    img: 'gallery1',    link: '/gallery',  Icon: Camera    },
-          ].map(({ title, sub, img, link, Icon }, i) => (
+          ].map(({ title, sub, link, Icon }, i) => (
             <Reveal key={i} delay={`${(i % 2) * 100}ms`}>
               <Link
                 to={link}
@@ -243,7 +243,12 @@ export default function Home() {
                 style={{ height: '320px' }}
               >
                 <img
-                  src={`https://picsum.photos/seed/${img}/800/600`}
+                  src={
+                    i === 0 ? "https://images.unsplash.com/photo-1558791985-4241e4011215?auto=format&fit=crop&q=80&w=800&h=600" :
+                    i === 1 ? "https://images.unsplash.com/photo-1496841733162-a88a250a275c?auto=format&fit=crop&q=80&w=800&h=600" :
+                    i === 2 ? "https://images.unsplash.com/photo-1656314945854-3ed692d05500?auto=format&fit=crop&q=80&w=800&h=600" :
+                    "https://images.unsplash.com/photo-1569691105751-88df003de7a4?auto=format&fit=crop&q=80&w=800&h=600"
+                  }
                   alt={title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -312,12 +317,12 @@ export default function Home() {
             <Reveal from="right" delay="150ms">
               <div className="relative h-[440px]">
                 <img
-                  src="https://picsum.photos/seed/yalapark1/700/500"
+                  src="https://images.unsplash.com/photo-1674556275189-e78fd6223e6d?auto=format&fit=crop&q=80&w=700&h=500"
                   alt="Yala Park"
                   className="absolute top-0 left-0 w-4/5 h-4/5 object-cover shadow-xl"
                 />
                 <img
-                  src="https://picsum.photos/seed/yalapark2/500/400"
+                  src="https://images.unsplash.com/photo-1700745325266-4499ce4f71cc?auto=format&fit=crop&q=80&w=500&h=400"
                   alt="Yala Wildlife"
                   className="absolute bottom-0 right-0 w-3/5 h-3/5 object-cover shadow-xl border-4 border-white"
                 />
@@ -372,13 +377,17 @@ export default function Home() {
               img: 'eveningsafari',
               badge: 'Scenic Pick',
             },
-          ].map(({ title, time, desc, img, badge }, i) => (
+          ].map(({ title, time, desc, badge }, i) => (
             <Reveal key={i} delay={`${i * 120}ms`}>
               <div className="group bg-white border border-gold/10 flex flex-col hover:-translate-y-2 hover:shadow-2xl transition-all duration-300">
                 {/* image */}
                 <div className="relative h-52 overflow-hidden">
                   <img
-                    src={`https://picsum.photos/seed/${img}/700/400`}
+                    src={
+                      i === 0 ? "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=700&h=400" :
+                      i === 1 ? "https://images.unsplash.com/photo-1705936981595-dea87508ce84?auto=format&fit=crop&q=80&w=700&h=400" :
+                      "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&q=80&w=700&h=400"
+                    }
                     alt={title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
@@ -438,7 +447,7 @@ export default function Home() {
             </blockquote>
             <div className="flex items-center justify-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-hidden border-2" style={{ borderColor: GOLD }}>
-                <img src="https://picsum.photos/seed/tourist1/100/100" alt="Eleanor H" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="Eleanor H" className="w-full h-full object-cover" />
               </div>
               <div className="text-left">
                 <p className="font-bold text-sm">Eleanor H.</p>

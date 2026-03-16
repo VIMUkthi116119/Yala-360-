@@ -87,7 +87,7 @@ const SAFARI_TYPES: SafariTypeObj[] = [
     timeRange: '5:30 AM – 6:30 PM',
     description: 'Complete wildlife exploration with extended park access.',
     highlights: ['Maximum Park Coverage', 'Picnic Lunch', 'Diverse Ecosystems'],
-    image: 'https://images.unsplash.com/photo-1523805081730-6144a777a660?auto=format&fit=crop&q=80&w=800',
+    image: 'https://images.unsplash.com/photo-1705936981595-dea87508ce84?auto=format&fit=crop&q=80&w=800',
     price: 150,
   },
 ];

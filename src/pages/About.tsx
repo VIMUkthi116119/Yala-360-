@@ -96,7 +96,7 @@ const About: React.FC = () => (
     {/* ── 1. HERO ── */}
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       <img
-        src="https://picsum.photos/seed/yala-gate/1920/1080"
+        src="https://images.unsplash.com/photo-1674556275189-e78fd6223e6d?auto=format&fit=crop&q=80&w=1920&h=1080"
         alt="Yala National Park"
         className="absolute inset-0 w-full h-full object-cover"
       />
@@ -176,7 +176,7 @@ const About: React.FC = () => (
         <Reveal from="left">
           <div className="h-[500px] lg:h-full min-h-[520px] overflow-hidden">
             <img
-              src="https://picsum.photos/seed/leopardstory/900/900"
+              src="https://images.unsplash.com/photo-1566708627877-859df13ae63e?auto=format&fit=crop&q=80&w=900&h=900"
               alt="Sri Lankan Leopard"
               className="w-full h-full object-cover"
             />
@@ -226,12 +226,12 @@ const About: React.FC = () => (
       </Reveal>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 border border-gold/10 max-w-6xl mx-auto">
-        <WildCard img="https://picsum.photos/seed/leopard2/600/700"   name="Sri Lankan Leopard"     label="Panthera pardus kotiya"  delay="0ms"   />
-        <WildCard img="https://picsum.photos/seed/elephant1/600/700"  name="Sri Lankan Elephant"    label="Elephas maximus maximus" delay="80ms"  />
-        <WildCard img="https://picsum.photos/seed/slothbear1/600/700" name="Sloth Bear"             label="Melursus ursinus"        delay="160ms" />
-        <WildCard img="https://picsum.photos/seed/croco1/600/700"     name="Mugger Crocodile"      label="Crocodylus palustris"    delay="0ms"   />
-        <WildCard img="https://picsum.photos/seed/peacock1/600/700"   name="Indian Peafowl"        label="Pavo cristatus"          delay="80ms"  />
-        <WildCard img="https://picsum.photos/seed/sambar1/600/700"    name="Sambar Deer"           label="Rusa unicolor"           delay="160ms" />
+        <WildCard img="https://images.unsplash.com/photo-1630315956721-b1cd928bd0d4?auto=format&fit=crop&q=80&w=600&h=700"   name="Sri Lankan Leopard"     label="Panthera pardus kotiya"  delay="0ms"   />
+        <WildCard img="https://images.unsplash.com/photo-1719807633728-7ff13f7f2b61?auto=format&fit=crop&q=80&w=600&h=700"  name="Sri Lankan Elephant"    label="Elephas maximus maximus" delay="80ms"  />
+        <WildCard img="https://images.unsplash.com/photo-1616128417743-c3a6992a65e7?auto=format&fit=crop&q=80&w=600&h=700" name="Leopard Cub"             label="Panthera pardus"        delay="160ms" />
+        <WildCard img="https://images.unsplash.com/photo-1559038209-9bc3455c7612?auto=format&fit=crop&q=80&w=600&h=700"     name="Safari Jeep"      label="Yala Experience"    delay="0ms"   />
+        <WildCard img="https://images.unsplash.com/photo-1717322277282-92d26fae790e?auto=format&fit=crop&q=80&w=600&h=700"   name="Indian Peafowl"        label="Pavo cristatus"          delay="80ms"  />
+        <WildCard img="https://images.unsplash.com/photo-1569691105751-88df003de7a4?auto=format&fit=crop&q=80&w=600&h=700"    name="Leopard Resting"           label="Wild encounters"           delay="160ms" />
       </div>
     </section>
 
@@ -275,7 +275,7 @@ const About: React.FC = () => (
         <Reveal from="right">
           <div className="h-[500px] lg:h-full min-h-[520px] overflow-hidden">
             <img
-              src="https://picsum.photos/seed/conservation2/900/900"
+              src="https://images.unsplash.com/photo-1570463662416-7d8e39fc67e2?auto=format&fit=crop&q=80&w=900&h=900"
               alt="Conservation"
               className="w-full h-full object-cover"
             />
@@ -312,7 +312,7 @@ const About: React.FC = () => (
         <Reveal from="left">
           <div className="h-[480px] lg:h-full min-h-[480px] overflow-hidden">
             <img
-              src="https://picsum.photos/seed/safariculture/900/900"
+              src="https://images.unsplash.com/photo-1743014118271-415197f9b0ef?auto=format&fit=crop&q=80&w=900&h=900"
               alt="Safari Culture"
               className="w-full h-full object-cover"
             />
