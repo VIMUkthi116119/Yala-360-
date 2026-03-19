@@ -18,10 +18,12 @@ import Rankings    from './pages/Rankings';
 import ProfilePage from './pages/ProfilePage';
 
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
   return (
-    <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
       <Router>
         <Layout>
           <Routes>
@@ -56,7 +58,8 @@ function App() {
           </Routes>
         </Layout>
       </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

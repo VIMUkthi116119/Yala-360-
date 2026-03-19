@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
@@ -60,6 +61,17 @@
         to   { opacity: 1; transform: translateY(0); }
       }
       .animate-fadeIn { animation: fadeInUp 1s ease both; }
+
+      /* ── Dark Mode Global Styles ── */
+      html.dark body {
+        background-color: #0f172a;
+        color: #f1f5f9;
+      }
+      html.dark .bg-beige {
+        background-color: #1e293b !important;
+      }
+      html.dark ::-webkit-scrollbar-track { background: #1e293b; }
+      html.dark ::-webkit-scrollbar-thumb { background: #22c55e; }
     </style>
   </head>
   <body>

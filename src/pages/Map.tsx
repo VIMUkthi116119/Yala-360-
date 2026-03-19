@@ -21,8 +21,10 @@ import BestRoute from '../components/map/BestRoute';
 // @ts-expect-error - JSX component
 import EventsGrid from '../components/map/EventsGrid';
 
+import { useTheme } from '../contexts/ThemeContext';
+
 const MapPage: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDark: isDarkMode } = useTheme();
   const [activeFilters, setActiveFilters] = useState<string[]>(['sightings']);
   const [blockTraffic, setBlockTraffic] = useState<any>({});
   const [leopardHotspots, setLeopardHotspots] = useState<any[]>([]);
@@ -98,15 +100,6 @@ const MapPage: React.FC = () => {
             Explore Yala's heartbeat through real-time data and historical landmarks.
           </p>
           
-          <div className="mt-6 flex justify-center">
-            <button 
-              className="p-2 rounded-full border border-gold/50 bg-white/50 hover:bg-gold hover:text-white transition-all dark:bg-gray-800 dark:text-gold dark:border-gold/30 shadow-sm flex items-center gap-2 px-4 text-sm font-semibold uppercase tracking-wider" 
-              onClick={() => setIsDarkMode(prev => !prev)}
-            >
-              <i className={isDarkMode ? "ph ph-sun text-lg" : "ph ph-moon text-lg"}></i>
-              {isDarkMode ? 'Light Map Mode' : 'Dark Map Mode'}
-            </button>
-          </div>
         </header>
 
         <main className="map-container relative mx-auto max-w-[1920px] overflow-hidden rounded-xl border border-gold/20 shadow-2xl mt-8 mx-4 lg:mx-12" style={{height: '75vh', minHeight: '600px'}}>

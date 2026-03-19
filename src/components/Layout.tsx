@@ -1,13 +1,15 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Instagram, Facebook, Twitter, LogOut, User } from 'lucide-react';
+import { Menu, X, Instagram, Facebook, Twitter, LogOut, User, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { currentUser, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -22,10 +24,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isDark ? 'dark' : ''}`}>
       {/* Navigation */}
-      <nav 
-        className="fixed top-0 left-0 w-full z-[99990] transition-all duration-500 px-6 lg:px-12 py-3 bg-beige shadow-md flex items-center justify-between text-black"
+      <nav
+        className="fixed top-0 left-0 w-full z-[99990] transition-all duration-500 px-6 lg:px-12 py-3 bg-beige dark:bg-gray-900 shadow-md flex items-center justify-between text-black dark:text-white"
       >
         <Link to="/" className="flex items-center space-x-2">
           <span className="text-2xl font-bold tracking-widest serif uppercase text-gold">
@@ -36,9 +38,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center space-x-8 uppercase tracking-widest text-xs font-bold">
           {navLinks.map((link) => (
-            <Link 
-              key={link.path} 
-              to={link.path} 
+            <Link
+              key={link.path}
+              to={link.path}
               className={`hover:text-gold transition-colors ${location.pathname === link.path ? 'text-gold underline underline-offset-8' : ''}`}
             >
               {link.name}
@@ -48,25 +50,96 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             ADMIN
           </Link>
           {currentUser ? (
-             <button onClick={logout} className="ml-4 flex items-center space-x-1 px-5 py-2 text-black hover:text-gold transition-all">
-               <LogOut size={16} /> <span>Sign Out</span>
-             </button>
+            <button onClick={logout} className="ml-4 flex items-center space-x-1 px-5 py-2 hover:text-gold transition-all">
+              <LogOut size={16} /> <span>Sign Out</span>
+            </button>
           ) : (
-            <Link to="/login" className="ml-4 flex items-center space-x-1 px-5 py-2 bg-black text-white hover:bg-gold transition-all">
-               <User size={16} /> <span>Sign In</span>
+            <Link to="/login" className="ml-4 flex items-center space-x-1 px-5 py-2 bg-black dark:bg-white dark:text-black text-white hover:bg-gold hover:text-white dark:hover:bg-gold transition-all">
+              <User size={16} /> <span>Sign In</span>
             </Link>
           )}
+
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            className="ml-2 relative w-[52px] h-[28px] rounded-full transition-all duration-500 focus:outline-none"
+            style={{
+              background: isDark
+                ? 'linear-gradient(135deg, #1e293b, #334155)'
+                : 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+              boxShadow: isDark
+                ? '0 0 12px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+                : '0 0 12px rgba(251,191,36,0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
+            }}
+          >
+            {/* Track stars (dark mode) / rays (light mode) */}
+            <span
+              className="absolute inset-0 rounded-full overflow-hidden flex items-center justify-center transition-opacity duration-300"
+              style={{ opacity: isDark ? 1 : 0 }}
+            >
+              <span className="text-[7px] text-blue-300 absolute top-[3px] left-[4px]">✦</span>
+              <span className="text-[5px] text-blue-200 absolute top-[10px] left-[8px]">✦</span>
+              <span className="text-[6px] text-indigo-200 absolute bottom-[4px] left-[6px]">✦</span>
+            </span>
+
+            {/* Thumb / Circle with icon */}
+            <span
+              className="absolute top-[3px] w-[22px] h-[22px] rounded-full flex items-center justify-center shadow-md transition-all duration-500"
+              style={{
+                left: isDark ? '27px' : '3px',
+                background: isDark ? '#fff' : '#fff',
+                boxShadow: isDark
+                  ? '0 2px 8px rgba(0,0,0,0.4)'
+                  : '0 2px 8px rgba(0,0,0,0.2)',
+              }}
+            >
+              {isDark
+                ? <Moon size={12} className="text-indigo-500" strokeWidth={2.5} />
+                : <Sun size={12} className="text-amber-500" strokeWidth={2.5} />
+              }
+            </span>
+          </button>
         </div>
 
         {/* Mobile Nav Toggle */}
-        <button className="lg:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        <div className="lg:hidden flex items-center space-x-3">
+          {/* Dark Mode Toggle (mobile) */}
+          <button
+            onClick={toggleTheme}
+            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            className="relative w-[48px] h-[26px] rounded-full transition-all duration-500 focus:outline-none"
+            style={{
+              background: isDark
+                ? 'linear-gradient(135deg, #1e293b, #334155)'
+                : 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+              boxShadow: isDark
+                ? '0 0 10px rgba(99,102,241,0.4)'
+                : '0 0 10px rgba(251,191,36,0.4)',
+            }}
+          >
+            <span
+              className="absolute top-[2px] w-[22px] h-[22px] rounded-full flex items-center justify-center shadow-md transition-all duration-500"
+              style={{
+                left: isDark ? '24px' : '2px',
+                background: '#fff',
+              }}
+            >
+              {isDark
+                ? <Moon size={11} className="text-indigo-500" strokeWidth={2.5} />
+                : <Sun size={11} className="text-amber-500" strokeWidth={2.5} />
+              }
+            </span>
+          </button>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-beige z-[99999] flex flex-col items-center justify-center space-y-8 text-2xl serif">
+        <div className="fixed inset-0 bg-beige dark:bg-gray-900 z-[99999] flex flex-col items-center justify-center space-y-8 text-2xl serif dark:text-white">
           <button className="absolute top-6 right-6" onClick={() => setIsMenuOpen(false)}>
             <X size={32} />
           </button>
@@ -77,13 +150,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           ))}
           <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="text-gold">Admin Portal</Link>
           {currentUser ? (
-             <button onClick={() => { logout(); setIsMenuOpen(false); }} className="mt-4 flex items-center space-x-2 text-black">
-               <LogOut size={24} /> <span>Sign Out</span>
-             </button>
+            <button onClick={() => { logout(); setIsMenuOpen(false); }} className="mt-4 flex items-center space-x-2">
+              <LogOut size={24} /> <span>Sign Out</span>
+            </button>
           ) : (
-             <Link to="/login" onClick={() => setIsMenuOpen(false)} className="mt-4 flex items-center space-x-2 text-black border-2 border-black px-6 py-2">
-               <User size={24} /> <span>Sign In</span>
-             </Link>
+            <Link to="/login" onClick={() => setIsMenuOpen(false)} className="mt-4 flex items-center space-x-2 border-2 px-6 py-2">
+              <User size={24} /> <span>Sign In</span>
+            </Link>
           )}
         </div>
       )}
@@ -99,7 +172,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="md:col-span-2">
             <h2 className="text-3xl serif mb-6 tracking-widest">YALA360</h2>
             <p className="text-gray-400 max-w-md leading-loose font-light">
-              Elevating the Sri Lankan safari experience through technology and luxury. 
+              Elevating the Sri Lankan safari experience through technology and luxury.
               Our mission is to reduce overcrowding while preserving the majesty of Yala's wildlife.
             </p>
           </div>
