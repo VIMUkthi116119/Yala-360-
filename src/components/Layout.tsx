@@ -25,7 +25,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen flex flex-col">
       {/* Navigation */}
       <nav 
-        className="fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 lg:px-12 py-3 bg-beige shadow-md flex items-center justify-between text-black"
+        className="fixed top-0 left-0 w-full z-[99990] transition-all duration-500 px-6 lg:px-12 py-3 bg-beige shadow-md flex items-center justify-between text-black"
       >
         <Link to="/" className="flex items-center space-x-2">
           <span className="text-2xl font-bold tracking-widest serif uppercase text-gold">
@@ -66,7 +66,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-beige z-[60] flex flex-col items-center justify-center space-y-8 text-2xl serif">
+        <div className="fixed inset-0 bg-beige z-[99999] flex flex-col items-center justify-center space-y-8 text-2xl serif">
           <button className="absolute top-6 right-6" onClick={() => setIsMenuOpen(false)}>
             <X size={32} />
           </button>

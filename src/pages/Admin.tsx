@@ -11,15 +11,16 @@ const Admin: React.FC = () => {
   useEffect(() => {
     if (loading) return;
 
-    if (!currentUser?.email) {
-      setIsAdmin(false);
-      return;
-    }
-
-    // Check Firestore admins collection
-    isAdminInFirestore(currentUser.email).then(result => {
+    const verifyAdmin = async () => {
+      if (!currentUser?.email) {
+        setIsAdmin(false);
+        return;
+      }
+      const result = await isAdminInFirestore(currentUser.email);
       setIsAdmin(result);
-    });
+    };
+
+    verifyAdmin();
   }, [currentUser, loading]);
 
   // Still loading auth or admin check

@@ -1,136 +1,149 @@
+import React, { useState, useEffect } from 'react';
+import { ref, onValue, remove } from 'firebase/database';
+import { rtdb as db } from '../firebase'; // RTDB Firebase reference
+import '../components/map/App.css';
+import '../components/map/map-index.css';
 
-import React, { useState } from 'react';
-import { MOCK_SIGHTINGS } from '../constants';
-import { MapPin, Info, Coffee, Camera, X } from 'lucide-react';
+// @ts-expect-error - JSX component
+import YalaMap from '../components/map/YalaMap';
+// @ts-expect-error - JSX component
+import RightSidePanel from '../components/map/RightSidePanel';
+// @ts-expect-error - JSX component
+import SightingTimeline from '../components/map/SightingTimeline';
+// @ts-expect-error - JSX component
+import WildlifeGallery from '../components/map/WildlifeGallery';
+// @ts-expect-error - JSX component
+import MapFilters from '../components/map/MapFilters';
+// @ts-expect-error - JSX component
+import PredictionPanel from '../components/map/PredictionPanel';
+// @ts-expect-error - JSX component
+import BestRoute from '../components/map/BestRoute';
+// @ts-expect-error - JSX component
+import EventsGrid from '../components/map/EventsGrid';
 
 const MapPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'sightings' | 'services' | 'attractions'>('sightings');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedPin, setSelectedPin] = useState<any>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<string[]>(['sightings']);
+  const [blockTraffic, setBlockTraffic] = useState<any>({});
+  const [leopardHotspots, setLeopardHotspots] = useState<any[]>([]);
+  const [sightings, setSightings] = useState<any[]>([]);
+  const [hideUI, setHideUI] = useState(false);
 
-  const services = [
-    { id: 'v1', name: 'Leopard Den Lodge', desc: 'Luxury eco-lodging adjacent to Zone 1.', x: 15, y: 40, type: 'services' },
-    { id: 'v2', name: 'Tusk & Trunk Cafe', desc: 'Authentic Sri Lankan breakfast for early starters.', x: 80, y: 20, type: 'services' },
-  ];
-
-  const attractions = [
-    { id: 'a1', name: 'Sithulpawwa Rock Temple', desc: 'Ancient 2nd century BC Buddhist monastery.', x: 50, y: 55, type: 'attractions' },
-    { id: 'a2', name: 'Magul Maha Viharaya', desc: 'Historical site with intricate stone carvings.', x: 30, y: 85, type: 'attractions' },
-  ];
-
-  const renderPins = () => {
-    if (activeTab === 'sightings') {
-      return MOCK_SIGHTINGS.map(s => (
-        <button 
-          key={s.id} 
-          onClick={() => setSelectedPin(s)}
-          style={{ left: `${s.coordinates.x}%`, top: `${s.coordinates.y}%` }}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 text-red-600 hover:scale-125 transition-all p-1 bg-white/50 rounded-full"
-        >
-          <Camera size={20} />
-        </button>
-      ));
-    }
-    if (activeTab === 'services') {
-      return services.map(s => (
-        <button 
-          key={s.id} 
-          onClick={() => setSelectedPin(s)}
-          style={{ left: `${s.x}%`, top: `${s.y}%` }}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 text-blue-600 hover:scale-125 transition-all p-1 bg-white/50 rounded-full"
-        >
-          <Coffee size={20} />
-        </button>
-      ));
-    }
-    if (activeTab === 'attractions') {
-      return attractions.map(s => (
-        <button 
-          key={s.id} 
-          onClick={() => setSelectedPin(s)}
-          style={{ left: `${s.x}%`, top: `${s.y}%` }}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 text-gold hover:scale-125 transition-all p-1 bg-white/50 rounded-full"
-        >
-          <MapPin size={20} />
-        </button>
-      ));
-    }
+  const toggleFilter = (filterId: string) => {
+    setActiveFilters((prev) => {
+      const isCurrentlyActive = prev.includes(filterId);
+      return isCurrentlyActive
+        ? prev.filter((id) => id !== filterId)
+        : [...prev, filterId];
+    });
   };
 
+  // Listen to Firebase sightings in real-time
+  useEffect(() => {
+    const sightingsRef = ref(db, 'sightings');
+    const unsubscribe = onValue(sightingsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        setSightings([]);
+        return;
+      }
+
+      const now = Date.now();
+      const validSightings: any[] = [];
+      const EXPIRY_TIME = 90 * 60 * 1000; // 1.5 hours
+
+      Object.entries(data).forEach(([id, sighting]: [string, any]) => {
+        const age = now - sighting.time;
+        if (age > EXPIRY_TIME) {
+          remove(ref(db, `sightings/${id}`));
+        } else {
+          validSightings.push({
+            ...sighting,
+            id,
+            isNew: age < 30000,
+          });
+        }
+      });
+
+      setSightings(validSightings);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    document.body.classList.toggle('hide-ui', hideUI);
+  }, [hideUI]);
+
+  useEffect(() => {
+    document.body.classList.toggle('ranger-mode-active', activeFilters.includes('ranger-mode'));
+  }, [activeFilters]);
+
+  // Clean-up classes on unmount
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('dark', 'hide-ui', 'ranger-mode-active');
+    };
+  }, []);
+
   return (
-    <div className="pt-32 pb-24 px-6 lg:px-24 bg-beige min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-12">
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl serif">Interactive Wilderness</h1>
-          <p className="text-gray-500 font-light italic">Explore Yala's heartbeat through real-time data and historical landmarks.</p>
+    <>
+      <div className="map-scope pt-24 pb-8 bg-beige dark:bg-gray-900 transition-colors duration-300">
+        <header className="page-header text-center mt-8">
+          <h1 className="text-4xl md:text-5xl serif mb-4 dark:text-white">Interactive Wilderness</h1>
+          <p className="text-gray-500 dark:text-gray-400 font-light italic max-w-2xl mx-auto px-4">
+            Explore Yala's heartbeat through real-time data and historical landmarks.
+          </p>
+          
+          <div className="mt-6 flex justify-center">
+            <button 
+              className="p-2 rounded-full border border-gold/50 bg-white/50 hover:bg-gold hover:text-white transition-all dark:bg-gray-800 dark:text-gold dark:border-gold/30 shadow-sm flex items-center gap-2 px-4 text-sm font-semibold uppercase tracking-wider" 
+              onClick={() => setIsDarkMode(prev => !prev)}
+            >
+              <i className={isDarkMode ? "ph ph-sun text-lg" : "ph ph-moon text-lg"}></i>
+              {isDarkMode ? 'Light Map Mode' : 'Dark Map Mode'}
+            </button>
+          </div>
+        </header>
+
+        <main className="map-container relative mx-auto max-w-[1920px] overflow-hidden rounded-xl border border-gold/20 shadow-2xl mt-8 mx-4 lg:mx-12" style={{height: '75vh', minHeight: '600px'}}>
+          <div className="sidebar-container absolute top-4 left-4 z-[400]">
+            <MapFilters activeFilters={activeFilters} toggleFilter={toggleFilter} hideUI={hideUI} setHideUI={setHideUI} />
+          </div>
+
+          {!hideUI && <RightSidePanel />}
+          
+          <YalaMap 
+            isDarkMode={isDarkMode} 
+            jeeps={[]} 
+            sightings={sightings} 
+            activeFilters={activeFilters} 
+            blockTraffic={blockTraffic} 
+            leopardHotspots={leopardHotspots} 
+          />
+        </main>
+
+        <div className="max-w-[1920px] mx-auto px-4 lg:px-12 mt-8">
+          <div id="sighting-history" className="timeline-container flex flex-col xl:flex-row gap-8">
+            <div className="flex-1 w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 overflow-hidden">
+                <SightingTimeline sightings={sightings} />
+            </div>
+            <aside className="analytics-sidebar flex-shrink-0 w-full xl:w-[400px] flex flex-col gap-8">
+              <BestRoute blockTraffic={blockTraffic} />
+              <PredictionPanel blockTraffic={blockTraffic} />
+            </aside>
+          </div>
         </div>
 
-        {/* Map Container */}
-        <div className="relative bg-white p-4 border border-gold/20 shadow-2xl rounded-sm overflow-hidden min-h-[600px]">
-          {/* Mock Map Background (Abstract SVG/Image) */}
-          <div className="absolute inset-0 bg-[#E8E2D8] opacity-50">
-            <svg width="100%" height="100%" viewBox="0 0 1000 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M50 300C150 200 300 400 500 300C700 200 850 400 950 300" stroke="#C5A059" strokeWidth="2" strokeDasharray="10 10"/>
-              <circle cx="200" cy="150" r="80" fill="#DCD3C1" />
-              <circle cx="700" cy="450" r="120" fill="#DCD3C1" />
-              <path d="M0 0H1000V600H0V0Z" fill="url(#pattern0)" fillOpacity="0.1"/>
-              <defs>
-                <pattern id="pattern0" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <circle cx="2" cy="2" r="1" fill="#C5A059" />
-                </pattern>
-              </defs>
-            </svg>
-          </div>
-
-          {/* Interactive Pins */}
-          {renderPins()}
-
-          {/* Map Controls */}
-          <div className="absolute top-4 left-4 sm:top-8 sm:left-8 flex flex-col space-y-2 z-10 w-48 sm:w-auto">
-            <button 
-              onClick={() => setActiveTab('sightings')}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'sightings' ? 'bg-gold text-white shadow-lg' : 'bg-white text-gray-500 hover:text-gold'}`}
-            >
-              Recent Sightings
-            </button>
-            <button 
-              onClick={() => setActiveTab('services')}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'services' ? 'bg-gold text-white shadow-lg' : 'bg-white text-gray-500 hover:text-gold'}`}
-            >
-              Hotels & Dining
-            </button>
-            <button 
-              onClick={() => setActiveTab('attractions')}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'attractions' ? 'bg-gold text-white shadow-lg' : 'bg-white text-gray-500 hover:text-gold'}`}
-            >
-              Attractions
-            </button>
-          </div>
-
-          {/* Selected Info Panel */}
-          {selectedPin && (
-            <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-auto sm:right-8 sm:w-80 bg-white shadow-2xl p-6 border-t-4 border-gold animate-slideInRight z-20">
-              <button onClick={() => setSelectedPin(null)} className="absolute top-2 right-2 text-gray-400 hover:text-black">
-                <X size={16} />
-              </button>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2 text-gold">
-                  <Info size={20} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Selected Detail</span>
-                </div>
-                <h3 className="text-xl serif">{String(selectedPin.animal || selectedPin.name)}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  {selectedPin.desc ? String(selectedPin.desc) : `Last spotted at ${String(selectedPin.time)} near ${String(selectedPin.location)}. This zone is currently showing moderate activity.`}
-                </p>
-                <button className="w-full py-2 bg-beige text-gold text-xs font-bold uppercase tracking-widest border border-gold/20 hover:bg-gold hover:text-white transition-all">
-                  Navigate To
-                </button>
-              </div>
-            </div>
-          )}
+        <div className="max-w-[1920px] mx-auto px-4 lg:px-12 pb-24 mt-8 space-y-8">
+          <EventsGrid />
+          <WildlifeGallery />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
