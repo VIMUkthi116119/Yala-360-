@@ -3,15 +3,23 @@ import {
   MOCK_GUIDES,
   MOCK_DENSITY_DATA,
   MOCK_SUCCESS_DATA,
-  MOCK_REVIEWS,
 } from '../mockData';
 import {
   getAllBookings,
   getTodayBookings,
   getBookingsCount,
   cancelBooking as firestoreCancelBooking,
-  updateBookingStatus,
 } from '../../../services/firebaseBooking';
+import {
+  getAllReviews,
+  deleteReview as firestoreDeleteReview,
+  flagReview as firestoreFlagReview,
+  getAllGalleryPhotos,
+  deleteGalleryPhoto,
+  setPhotoApproval,
+  getAllSightings,
+  deleteSighting as firestoreDeleteSighting,
+} from '../../../services/firebaseAdminService';
 
 /**
  * Admin API Service — uses Firestore for bookings, mock data for everything else
@@ -203,19 +211,44 @@ export const api = {
 
   // ── Reviews ────────────────────────────────────────────────
   getReviews: async () => {
-    return { reviews: MOCK_REVIEWS };
+    try {
+      const reviews = await getAllReviews();
+      return { reviews };
+    } catch (err) {
+      console.error('getReviews error:', err);
+      return { reviews: [] };
+    }
   },
 
   approveReview: async (id: string) => {
-    return { success: true };
+    try {
+      // Mark as not flagged (approved)
+      await firestoreFlagReview(id, false);
+      return { success: true };
+    } catch (err) {
+      console.error('approveReview error:', err);
+      throw err;
+    }
   },
 
   deleteReview: async (id: string) => {
-    return { success: true };
+    try {
+      await firestoreDeleteReview(id);
+      return { success: true };
+    } catch (err) {
+      console.error('deleteReview error:', err);
+      throw err;
+    }
   },
 
   flagReview: async (id: string) => {
-    return { success: true };
+    try {
+      await firestoreFlagReview(id, true);
+      return { success: true };
+    } catch (err) {
+      console.error('flagReview error:', err);
+      throw err;
+    }
   },
 
   // ── Notifications ──────────────────────────────────────────
@@ -259,15 +292,38 @@ export const api = {
 
   // ── Gallery ────────────────────────────────────────────────
   getGallery: async () => {
-    return { images: [] };
+    try {
+      const images = await getAllGalleryPhotos();
+      return { images };
+    } catch (err) {
+      console.error('getGallery error:', err);
+      return { images: [] };
+    }
   },
 
   addGalleryImage: async (data: { url: string; title?: string }) => {
+    // Admin gallery add not implemented — users upload via the Gallery page
     return { success: true, image: { id: Date.now().toString(), ...data } };
   },
 
   removeGalleryImage: async (id: string) => {
-    return { success: true };
+    try {
+      await deleteGalleryPhoto(id);
+      return { success: true };
+    } catch (err) {
+      console.error('removeGalleryImage error:', err);
+      throw err;
+    }
+  },
+
+  approveGalleryImage: async (id: string) => {
+    try {
+      await setPhotoApproval(id, true);
+      return { success: true };
+    } catch (err) {
+      console.error('approveGalleryImage error:', err);
+      throw err;
+    }
   },
 
   // ── Map Management ─────────────────────────────────────────
@@ -287,9 +343,15 @@ export const api = {
     return { success: true };
   },
 
-  // ── Animal Sightings ───────────────────────────────────────
+  // ── Animal Sightings (Realtime Database) ───────────────────
   getAnimalSightings: async () => {
-    return { sightings: [] };
+    try {
+      const sightings = await getAllSightings();
+      return { sightings };
+    } catch (err) {
+      console.error('getAnimalSightings error:', err);
+      return { sightings: [] };
+    }
   },
 
   updateAnimalSighting: async (id: string, data: unknown) => {
@@ -297,6 +359,12 @@ export const api = {
   },
 
   deleteAnimalSighting: async (id: string) => {
-    return { success: true };
+    try {
+      await firestoreDeleteSighting(id);
+      return { success: true };
+    } catch (err) {
+      console.error('deleteAnimalSighting error:', err);
+      throw err;
+    }
   }
 };

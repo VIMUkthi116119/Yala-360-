@@ -4,14 +4,11 @@ import {
   Filter, 
   ChevronDown, 
   MoreHorizontal, 
-  Eye, 
-  UserMinus, 
+  Trash2,
   XCircle,
   Download,
   Calendar,
   RefreshCw,
-  CheckCircle2,
-  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../services/api';
@@ -21,6 +18,7 @@ import { ToastType } from '../components/Toast';
 import FilterPanel from '../components/FilterPanel';
 import ExportModal from '../components/ExportModal';
 import ConfirmationModal from '../components/ConfirmationModal';
+import { deleteBooking } from '../../../services/firebaseBooking';
 
 const STATUS_COLORS: Record<BookingStatus | string, string> = {
   'Confirmed': 'bg-emerald-50 text-emerald-600 border-emerald-100',
@@ -49,6 +47,7 @@ export default function Bookings({ showToast }: { showToast: (msg: string, type?
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [reassigningId, setReassigningId] = useState<string | null>(null);
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -89,13 +88,23 @@ export default function Bookings({ showToast }: { showToast: (msg: string, type?
     }
   };
 
-   const handleCancel = async (id: string) => {
+   const handleCancel = async (docId: string) => {
     try {
-      await api.cancelBooking(id);
+      await api.cancelBooking(docId);
       showToast('Booking cancelled successfully');
       fetchBookings();
     } catch (error) {
       showToast('Failed to cancel booking', 'error');
+    }
+  };
+
+  const handleDelete = async (docId: string) => {
+    try {
+      await deleteBooking(docId);
+      showToast('Booking deleted permanently', 'success');
+      fetchBookings();
+    } catch (error) {
+      showToast('Failed to delete booking', 'error');
     }
   };
 
@@ -208,7 +217,7 @@ export default function Bookings({ showToast }: { showToast: (msg: string, type?
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => handleAutoReassign(booking.id)}
                         disabled={reassigningId === booking.id}
@@ -221,17 +230,18 @@ export default function Bookings({ showToast }: { showToast: (msg: string, type?
                         <RefreshCw className="w-4 h-4" />
                       </button>
                       <button 
-                        className="p-2 rounded-lg bg-slate-100 text-rose-600 hover:bg-rose-100 transition-all" 
+                        className="p-2 rounded-lg bg-slate-100 text-amber-600 hover:bg-amber-50 transition-all" 
                         title="Cancel Booking"
-                        onClick={() => setConfirmCancelId(booking.id)}
+                        onClick={() => setConfirmCancelId(booking.docId || booking.id)}
                       >
                         <XCircle className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => showToast('Booking details and history will be available in the next update.')}
-                        className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-all"
+                        className="p-2 rounded-lg bg-slate-100 text-rose-600 hover:bg-rose-50 transition-all"
+                        title="Delete Booking Permanently"
+                        onClick={() => setConfirmDeleteId(booking.docId || booking.id)}
                       >
-                        <MoreHorizontal className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -281,10 +291,20 @@ export default function Bookings({ showToast }: { showToast: (msg: string, type?
       <ConfirmationModal
         isOpen={!!confirmCancelId}
         onClose={() => setConfirmCancelId(null)}
-        onConfirm={() => confirmCancelId && handleCancel(confirmCancelId)}
+        onConfirm={() => { if (confirmCancelId) handleCancel(confirmCancelId); setConfirmCancelId(null); }}
         title="Cancel Booking"
-        message="Are you sure you want to cancel this booking? This action will notify the tourist and the assigned driver."
+        message="Are you sure you want to cancel this booking? This will update the status to Cancelled."
         confirmLabel="Cancel Booking"
+        variant="danger"
+      />
+
+      <ConfirmationModal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => { if (confirmDeleteId) handleDelete(confirmDeleteId); setConfirmDeleteId(null); }}
+        title="Delete Booking"
+        message="Are you sure you want to permanently delete this booking from the database? This cannot be undone."
+        confirmLabel="Delete Permanently"
         variant="danger"
       />
 

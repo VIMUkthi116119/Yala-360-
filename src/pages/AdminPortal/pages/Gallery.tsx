@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Image as ImageIcon, Plus, Trash2, Calendar, ExternalLink, X } from 'lucide-react';
+import { Image as ImageIcon, Trash2, Calendar, ExternalLink, CheckCircle2, User, Tag } from 'lucide-react';
 import { api } from '../services/api';
 import { cn } from '../utils';
 import { ToastType } from '../components/Toast';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function Gallery({ showToast }: { showToast: (msg: string, type?: ToastType) => void }) {
   const [images, setImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newImageUrl, setNewImageUrl] = useState('');
-  const [newImageTitle, setNewImageTitle] = useState('');
-  const [adding, setAdding] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const fetchGallery = async () => {
     setLoading(true);
@@ -18,7 +16,7 @@ export default function Gallery({ showToast }: { showToast: (msg: string, type?:
       const data = await api.getGallery();
       setImages(data.images);
     } catch (error) {
-      showToast('Failed to fetch gallery images', 'error');
+      showToast('Failed to fetch gallery photos', 'error');
     } finally {
       setLoading(false);
     }
@@ -28,34 +26,24 @@ export default function Gallery({ showToast }: { showToast: (msg: string, type?:
     fetchGallery();
   }, []);
 
-  const handleAddImage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newImageUrl.trim()) return;
-
-    setAdding(true);
+  const handleRemoveImage = async (id: string) => {
     try {
-      await api.addGalleryImage({ url: newImageUrl, title: newImageTitle });
-      showToast('Image added to gallery successfully!');
-      setNewImageUrl('');
-      setNewImageTitle('');
-      setIsModalOpen(false);
+      await api.removeGalleryImage(id);
+      showToast('Photo removed from gallery');
       fetchGallery();
     } catch (error) {
-      showToast('Failed to add image', 'error');
-    } finally {
-      setAdding(false);
+      showToast('Failed to remove photo', 'error');
     }
   };
 
-  const handleRemoveImage = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this image from the gallery?')) return;
-
+  const handleApproveImage = async (id: string) => {
     try {
-      await api.removeGalleryImage(id);
-      showToast('Image removed from gallery');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (api as any).approveGalleryImage(id);
+      showToast('Photo approved — now visible to guests');
       fetchGallery();
     } catch (error) {
-      showToast('Failed to remove image', 'error');
+      showToast('Failed to approve photo', 'error');
     }
   };
 
@@ -71,107 +59,113 @@ export default function Gallery({ showToast }: { showToast: (msg: string, type?:
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Park Gallery</h2>
-          <p className="text-slate-500 text-sm">Manage promotional and sighting photos for the guest app</p>
+          <h2 className="text-2xl font-bold text-slate-900">Guest Photo Gallery</h2>
+          <p className="text-slate-500 text-sm mt-1">
+            {images.length} photo{images.length !== 1 ? 's' : ''} uploaded by guests — review and moderate below.
+          </p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-safari-gold text-safari-dark rounded-xl font-bold shadow-lg shadow-safari-gold/20 hover:bg-safari-gold/90 transition-all"
-        >
-          <Plus className="w-5 h-5" />
-          Add New Photo
-        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {images.map((img) => (
-          <div key={img.id} className="glass-card overflow-hidden group">
-            <div className="aspect-video relative overflow-hidden">
-              <img 
-                src={img.url} 
-                alt={img.title} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                <button 
-                  onClick={() => window.open(img.url, '_blank')}
-                  className="p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 transition-colors"
-                >
-                  <ExternalLink className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={() => handleRemoveImage(img.id)}
-                  className="p-2 rounded-full bg-rose-500/20 backdrop-blur-md text-rose-500 hover:bg-rose-500/40 transition-colors"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-slate-900 line-clamp-1">{img.title}</h3>
-              <div className="flex items-center gap-2 mt-2 text-slate-500">
-                <Calendar className="w-3 h-3" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">{img.date}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add Image Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-safari-dark/60 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-md p-8 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-900">Add Gallery Photo</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddImage} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-500">Photo URL</label>
-                <input 
-                  type="url" 
-                  placeholder="https://example.com/photo.jpg" 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-safari-gold/50 text-slate-900"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  required
+      {images.length === 0 ? (
+        <div className="glass-card p-16 flex flex-col items-center justify-center text-center gap-4">
+          <ImageIcon className="w-16 h-16 text-slate-200" />
+          <p className="text-slate-500 font-medium">No guest photos yet.</p>
+          <p className="text-slate-400 text-sm">Photos uploaded by guests on the Gallery page will appear here.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {images.map((img) => (
+            <div key={img.id} className="glass-card overflow-hidden group flex flex-col">
+              {/* Photo */}
+              <div className="aspect-video relative overflow-hidden bg-slate-100">
+                <img
+                  src={img.url}
+                  alt={img.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
                 />
+                {/* Overlay actions */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => window.open(img.url, '_blank')}
+                    className="p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/40 transition-colors"
+                    title="Open full size"
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleApproveImage(img.id)}
+                    className="p-2 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-300 hover:bg-emerald-500/50 transition-colors"
+                    title="Approve photo"
+                  >
+                    <CheckCircle2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(img.id)}
+                    className="p-2 rounded-full bg-rose-500/20 backdrop-blur-md text-rose-300 hover:bg-rose-500/50 transition-colors"
+                    title="Delete photo"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Approval badge */}
+                <div className="absolute top-2 right-2">
+                  <span className={cn(
+                    'text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border',
+                    img.approved
+                      ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                      : 'bg-amber-50 text-amber-600 border-amber-100'
+                  )}>
+                    {img.approved ? 'Approved' : 'Pending'}
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-500">Title / Caption</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Majestic Leopard at Sunset" 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-safari-gold/50 text-slate-900"
-                  value={newImageTitle}
-                  onChange={(e) => setNewImageTitle(e.target.value)}
-                />
-              </div>
+              {/* Metadata */}
+              <div className="p-4 flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-3 h-3 text-safari-gold flex-shrink-0" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-safari-gold">{img.category}</span>
+                </div>
 
-              <div className="pt-4">
-                <button 
-                  type="submit" 
-                  disabled={adding || !newImageUrl.trim()}
-                  className="w-full py-4 bg-safari-gold text-safari-dark rounded-xl font-bold text-lg hover:bg-safari-gold/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {adding ? (
-                    <div className="w-5 h-5 border-2 border-safari-dark/30 border-t-safari-dark rounded-full animate-spin"></div>
-                  ) : (
-                    <Plus className="w-5 h-5" />
-                  )}
-                  Add to Gallery
-                </button>
+                {img.bookingId && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                      {img.bookingId}
+                    </span>
+                  </div>
+                )}
+
+                {img.userEmail && (
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <User className="w-3 h-3 flex-shrink-0" />
+                    <span className="text-[10px] truncate">{img.userEmail}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <Calendar className="w-3 h-3 flex-shrink-0" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{img.date}</span>
+                </div>
               </div>
-            </form>
-          </div>
+            </div>
+          ))}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={!!confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => {
+          if (confirmDeleteId) handleRemoveImage(confirmDeleteId);
+          setConfirmDeleteId(null);
+        }}
+        title="Delete Photo"
+        message="Are you sure you want to permanently delete this guest photo? This cannot be undone."
+        confirmLabel="Delete Photo"
+        variant="danger"
+      />
     </div>
   );
 }
