@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Instagram, Facebook, Twitter, LogOut, User, Sun, Moon } from 'lucide-react';
+import { Menu, X, Instagram, Facebook, Twitter, LogOut, User, Sun, Moon, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { currentUser, logout } = useAuth();
+  const { isAdmin } = useAdminAuth();
   const { isDark, toggleTheme } = useTheme();
 
   const navLinks = [
@@ -36,26 +38,42 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center space-x-8 uppercase tracking-widest text-xs font-bold">
+        <div className="hidden lg:flex items-center space-x-5 uppercase tracking-wider text-[11px] font-bold">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`hover:text-gold transition-colors ${location.pathname === link.path ? 'text-gold underline underline-offset-8' : ''}`}
+              className={`text-gold transition-colors whitespace-nowrap ${location.pathname === link.path ? 'underline underline-offset-8' : 'hover:opacity-70'}`}
             >
               {link.name}
             </Link>
           ))}
-          <Link to="/admin" className="ml-4 px-5 py-2 border border-gold text-gold hover:bg-gold hover:text-white transition-all">
-            ADMIN
-          </Link>
+
+          {/* Admin Dashboard — only visible to verified admins */}
+          {isAdmin === true && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 px-4 py-1.5 border border-gold text-gold hover:bg-gold hover:text-white transition-all whitespace-nowrap"
+            >
+              <ShieldCheck size={13} />
+              <span>ADMIN</span>
+            </Link>
+          )}
+
+          {/* Sign In / Sign Out */}
           {currentUser ? (
-            <button onClick={logout} className="ml-4 flex items-center space-x-1 px-5 py-2 hover:text-gold transition-all">
-              <LogOut size={16} /> <span>Sign Out</span>
+            <button
+              onClick={logout}
+              className="flex items-center space-x-2 px-5 py-2 bg-[#1A1A1A] text-white hover:bg-gold transition-all whitespace-nowrap dark:bg-white dark:text-black dark:hover:bg-gold dark:hover:text-white"
+            >
+              <LogOut size={14} /> <span>SIGN OUT</span>
             </button>
           ) : (
-            <Link to="/login" className="ml-4 flex items-center space-x-1 px-5 py-2 bg-black dark:bg-white dark:text-black text-white hover:bg-gold hover:text-white dark:hover:bg-gold transition-all">
-              <User size={16} /> <span>Sign In</span>
+            <Link
+              to="/login"
+              className="flex items-center space-x-2 px-5 py-2 bg-[#1A1A1A] text-white hover:bg-gold transition-all whitespace-nowrap dark:bg-white dark:text-black dark:hover:bg-gold dark:hover:text-white"
+            >
+              <User size={14} /> <span>SIGN IN</span>
             </Link>
           )}
 
@@ -63,42 +81,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <button
             onClick={toggleTheme}
             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="ml-2 relative w-[52px] h-[28px] rounded-full transition-all duration-500 focus:outline-none"
+            className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none hover:scale-110 active:scale-95"
             style={{
               background: isDark
-                ? 'linear-gradient(135deg, #1e293b, #334155)'
-                : 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                ? 'rgba(99,102,241,0.15)'
+                : 'rgba(213,185,145,0.2)',
+              border: isDark
+                ? '1.5px solid rgba(99,102,241,0.4)'
+                : '1.5px solid rgba(213,185,145,0.5)',
               boxShadow: isDark
-                ? '0 0 12px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
-                : '0 0 12px rgba(251,191,36,0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
+                ? '0 0 10px rgba(99,102,241,0.25)'
+                : '0 0 10px rgba(213,185,145,0.3)',
             }}
           >
-            {/* Track stars (dark mode) / rays (light mode) */}
-            <span
-              className="absolute inset-0 rounded-full overflow-hidden flex items-center justify-center transition-opacity duration-300"
-              style={{ opacity: isDark ? 1 : 0 }}
-            >
-              <span className="text-[7px] text-blue-300 absolute top-[3px] left-[4px]">✦</span>
-              <span className="text-[5px] text-blue-200 absolute top-[10px] left-[8px]">✦</span>
-              <span className="text-[6px] text-indigo-200 absolute bottom-[4px] left-[6px]">✦</span>
-            </span>
-
-            {/* Thumb / Circle with icon */}
-            <span
-              className="absolute top-[3px] w-[22px] h-[22px] rounded-full flex items-center justify-center shadow-md transition-all duration-500"
-              style={{
-                left: isDark ? '27px' : '3px',
-                background: isDark ? '#fff' : '#fff',
-                boxShadow: isDark
-                  ? '0 2px 8px rgba(0,0,0,0.4)'
-                  : '0 2px 8px rgba(0,0,0,0.2)',
-              }}
-            >
-              {isDark
-                ? <Moon size={12} className="text-indigo-500" strokeWidth={2.5} />
-                : <Sun size={12} className="text-amber-500" strokeWidth={2.5} />
-              }
-            </span>
+            {isDark
+              ? <Moon size={16} style={{ color: '#818cf8' }} strokeWidth={2} />
+              : <Sun size={16} style={{ color: '#d5b991' }} strokeWidth={2} />
+            }
           </button>
         </div>
 
@@ -108,28 +107,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <button
             onClick={toggleTheme}
             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="relative w-[48px] h-[26px] rounded-full transition-all duration-500 focus:outline-none"
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none hover:scale-110 active:scale-95"
             style={{
               background: isDark
-                ? 'linear-gradient(135deg, #1e293b, #334155)'
-                : 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-              boxShadow: isDark
-                ? '0 0 10px rgba(99,102,241,0.4)'
-                : '0 0 10px rgba(251,191,36,0.4)',
+                ? 'rgba(99,102,241,0.15)'
+                : 'rgba(213,185,145,0.2)',
+              border: isDark
+                ? '1.5px solid rgba(99,102,241,0.4)'
+                : '1.5px solid rgba(213,185,145,0.5)',
             }}
           >
-            <span
-              className="absolute top-[2px] w-[22px] h-[22px] rounded-full flex items-center justify-center shadow-md transition-all duration-500"
-              style={{
-                left: isDark ? '24px' : '2px',
-                background: '#fff',
-              }}
-            >
-              {isDark
-                ? <Moon size={11} className="text-indigo-500" strokeWidth={2.5} />
-                : <Sun size={11} className="text-amber-500" strokeWidth={2.5} />
-              }
-            </span>
+            {isDark
+              ? <Moon size={16} style={{ color: '#818cf8' }} strokeWidth={2} />
+              : <Sun size={16} style={{ color: '#d5b991' }} strokeWidth={2} />
+            }
           </button>
           <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -148,7 +139,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {link.name}
             </Link>
           ))}
-          <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="text-gold">Admin Portal</Link>
+          {/* Admin link in mobile menu — only for verified admins */}
+          {isAdmin === true && (
+            <Link
+              to="/admin"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center gap-2 text-gold"
+            >
+              <ShieldCheck size={18} />
+              Admin Dashboard
+            </Link>
+          )}
           {currentUser ? (
             <button onClick={() => { logout(); setIsMenuOpen(false); }} className="mt-4 flex items-center space-x-2">
               <LogOut size={24} /> <span>Sign Out</span>

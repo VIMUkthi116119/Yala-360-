@@ -1,45 +1,49 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-
-// List of admin email addresses — add your admin emails here
-const ADMIN_EMAILS = [
-  'vimukthiubeysekera@gmail.com',
-  'admin@yala360.com',
-];
+import { useAdminAuth } from '../contexts/AdminAuthContext';
+import { Shield } from 'lucide-react';
 
 interface Props {
   children: React.ReactNode;
 }
 
 /**
- * ProtectedAdminRoute
+ * ProtectedAdminRoute — wraps admin-only pages.
  *
- * Wraps a route so that only logged-in admins can access it.
- * - Not logged in → redirect to /login
- * - Logged in but NOT admin → redirect to / with a warning
+ *  • isAdmin === null  → still verifying (show spinner)
+ *  • isAdmin === false → not an admin, redirect to /admin-login
+ *  • isAdmin === true  → verified admin, render children
  */
 const ProtectedAdminRoute: React.FC<Props> = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { isAdmin } = useAdminAuth();
 
-  if (loading) {
+  // Still checking Firestore — show a full-screen loading state
+  if (isAdmin === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600" />
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0f172a] gap-6">
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl"
+          style={{ background: 'linear-gradient(135deg, #d5b991, #a07c3e)' }}
+        >
+          <Shield className="w-8 h-8 text-white" />
+        </div>
+        <div
+          className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
+          style={{ borderColor: 'rgba(213,185,145,0.3)', borderTopColor: '#d5b991' }}
+        />
+        <p className="text-xs uppercase tracking-[0.3em] font-bold text-slate-500">
+          Verifying Access…
+        </p>
       </div>
     );
   }
 
-  if (!currentUser) {
-    // Not logged in — send to login
-    return <Navigate to="/login" replace />;
+  // Not a verified admin — redirect to admin login
+  if (!isAdmin) {
+    return <Navigate to="/admin-login" replace />;
   }
 
-  if (!ADMIN_EMAILS.includes(currentUser.email || '')) {
-    // Logged in but not an admin — go back home
-    return <Navigate to="/" replace />;
-  }
-
+  // Verified admin — render the protected content
   return <>{children}</>;
 };
 

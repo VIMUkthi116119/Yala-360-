@@ -87,30 +87,30 @@ export default function Home() {
             className="text-[11px] uppercase tracking-[0.4em] text-gold font-bold mb-6"
             style={{ animationDelay: '0.2s' }}
           >
-            Sri Lanka's Premier Safari Platform
+            SRI LANKA'S PREMIER SAFARI PLATFORM
           </p>
           <h1
-            className="text-6xl md:text-8xl lg:text-[100px] serif leading-none mb-8"
+            className="text-6xl md:text-8xl lg:text-[100px] serif leading-none mb-8 uppercase"
             style={{ textShadow: '0 4px 40px rgba(0,0,0,0.5)' }}
           >
-            Wildly<br />Elegant.
+            WILDLY ELEGANT.
           </h1>
-          <p className="text-lg md:text-xl font-light tracking-widest uppercase italic text-white/80 mb-12">
-            The Ultimate Luxury Safari Experience in Yala
+          <p className="text-lg md:text-xl font-light tracking-widest uppercase italic text-gold mb-12">
+            THE ULTIMATE LUXURY SAFARI EXPERIENCE IN YALA
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/booking"
               className="group px-10 py-4 bg-gold text-white font-bold uppercase tracking-widest text-sm hover:bg-white hover:text-gold transition-all flex items-center gap-2"
             >
-              Book Your Safari
+              BOOK YOUR SAFARI
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               to="/about"
-              className="px-10 py-4 border border-white/50 text-white font-bold uppercase tracking-widest text-sm hover:border-gold hover:text-gold transition-all"
+              className="px-10 py-4 border border-gold text-gold font-bold uppercase tracking-widest text-sm hover:bg-gold hover:text-white transition-all"
             >
-              Explore Park
+              EXPLORE PARK
             </Link>
           </div>
         </div>

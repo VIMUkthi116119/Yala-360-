@@ -70,7 +70,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="h-full flex items-center justify-center bg-[#0f172a]">
+    <div className="h-full flex items-center justify-center bg-[#C5A059]">
       <div className="w-full max-w-md mx-4">
         {/* Logo / Header */}
         <div className="text-center mb-10">

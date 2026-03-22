@@ -6,15 +6,12 @@ import {
   MapPin, 
   TrendingUp, 
   Star, 
-  QrCode, 
   Bell, 
   Settings, 
   LogOut,
-  Menu,
-  X,
   ChevronRight,
-  ShieldCheck,
-  Trophy
+  Trophy,
+  ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from './utils';
@@ -227,12 +224,28 @@ export default function App() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-slate-200 space-y-2">
+          {/* Back to Website */}
+          <button
+            onClick={() => { window.location.hash = '/'; }}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-[#d5b991]/10 hover:text-[#a07c3e] transition-colors group"
+            title="Back to Website"
+          >
+            <ArrowLeft className="w-5 h-5 flex-shrink-0" />
+            {isSidebarOpen && (
+              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-medium whitespace-nowrap">
+                Back to Website
+              </motion.span>
+            )}
+          </button>
+
+          {/* Logout */}
           <button 
             onClick={() => setIsLogoutModalOpen(true)}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+            title="Logout"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-5 h-5 flex-shrink-0" />
             {isSidebarOpen && <span className="font-medium">Logout</span>}
           </button>
         </div>

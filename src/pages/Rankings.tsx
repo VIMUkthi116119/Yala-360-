@@ -78,7 +78,7 @@ const SkillTag: React.FC<{ skill: string }> = ({ skill }) => {
   };
 
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#1a2e1a]/5 text-[#1a2e1a] text-[10px] uppercase tracking-wider font-bold border border-[#1a2e1a]/10">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#d5b991]/10 text-slate-900 text-[10px] uppercase tracking-wider font-bold border border-[#d5b991]/20">
       {getIcon(skill)}
       {skill}
     </span>
@@ -115,10 +115,10 @@ const RankBadge: React.FC<{ rank: number, isTop?: boolean }> = ({ rank, isTop })
   return (
     <div className="absolute -top-4 -left-4 z-20 group-hover:scale-110 transition-transform duration-500">
       <div className={`relative w-12 h-12 rounded-2xl flex flex-col items-center justify-center shadow-2xl bg-gradient-to-br ${config?.colors} border border-white/40 transform -rotate-12 group-hover:rotate-0 transition-all duration-500`}>
-        <div className="text-[#1a2e1a] drop-shadow-sm">
+        <div className="text-slate-900 drop-shadow-sm">
           {config?.icon}
         </div>
-        <span className="text-[7px] font-black uppercase tracking-tighter text-[#1a2e1a]/80 -mt-0.5">
+        <span className="text-[7px] font-black uppercase tracking-tighter text-slate-900/80 -mt-0.5">
           {config?.label}
         </span>
       </div>
@@ -139,10 +139,10 @@ const DriverCard: React.FC<{ driver: Driver, isTop?: boolean }> = ({ driver, isT
       onHoverEnd={() => setIsHovered(false)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative group bg-white rounded-2xl border border-stone-200 overflow-hidden transition-all duration-500 cursor-pointer ${isTop ? 'shadow-xl ring-1 ring-[#c5a059]/20' : 'shadow-sm hover:shadow-xl hover:ring-1 hover:ring-[#c5a059]/10'}`}
+      className={`relative group bg-white rounded-2xl border border-stone-200 overflow-hidden transition-all duration-500 cursor-pointer ${isTop ? 'shadow-xl ring-1 ring-[#d5b991]/20' : 'shadow-sm hover:shadow-xl hover:ring-1 hover:ring-[#d5b991]/10'}`}
     >
       {isTop && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#c5a059] to-transparent opacity-30" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#d5b991] to-transparent opacity-30" />
       )}
       
       <div className="p-6">
@@ -152,17 +152,17 @@ const DriverCard: React.FC<{ driver: Driver, isTop?: boolean }> = ({ driver, isT
               <img 
                 src={driver.profilePhoto} 
                 alt={driver.name}
-                className={`w-16 h-16 rounded-2xl object-cover border-2 transition-all duration-500 ${isHovered ? 'scale-110 border-[#c5a059]' : 'border-stone-100'}`}
+                className={`w-16 h-16 rounded-2xl object-cover border-2 transition-all duration-500 ${isHovered ? 'scale-110 border-[#d5b991]' : 'border-stone-100'}`}
                 referrerPolicy="no-referrer"
               />
               <RankBadge rank={driver.rank} isTop={isTop} />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-serif font-bold text-[#1a2e1a] group-hover:text-[#c5a059] transition-colors leading-tight">{driver.name}</h3>
+              <h3 className="text-xl font-serif font-bold text-slate-900 group-hover:text-[#c5a059] transition-colors leading-tight">{driver.name}</h3>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-[#c5a059] text-[#c5a059]" />
-                  <span className="text-xs font-black text-[#1a2e1a]">{driver.rating.toFixed(1)}</span>
+                  <Star className="w-3 h-3 fill-[#d5b991] text-[#d5b991]" />
+                  <span className="text-xs font-black text-slate-900">{driver.rating.toFixed(1)}</span>
                 </div>
                 <span className="text-[10px] text-stone-400 font-mono uppercase tracking-widest">{driver.id}</span>
               </div>
@@ -186,7 +186,7 @@ const DriverCard: React.FC<{ driver: Driver, isTop?: boolean }> = ({ driver, isT
                 <div className="flex items-center gap-2">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(driver.rating) ? 'fill-[#c5a059] text-[#c5a059]' : 'text-stone-200'}`} />
+                      <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(driver.rating) ? 'fill-[#d5b991] text-[#d5b991]' : 'text-stone-200'}`} />
                     ))}
                   </div>
                   <span className="text-xs text-stone-400 font-medium">({driver.totalReviews} reviews)</span>
@@ -195,15 +195,15 @@ const DriverCard: React.FC<{ driver: Driver, isTop?: boolean }> = ({ driver, isT
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-100 text-center">
                     <p className="text-[9px] text-stone-400 uppercase font-black tracking-widest mb-1">Exp</p>
-                    <p className="text-xs font-bold text-[#1a2e1a]">{driver.experienceYears}Y</p>
+                    <p className="text-xs font-bold text-slate-900">{driver.experienceYears}Y</p>
                   </div>
                   <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-100 text-center">
                     <p className="text-[9px] text-stone-400 uppercase font-black tracking-widest mb-1">Safaris</p>
-                    <p className="text-xs font-bold text-[#1a2e1a]">{driver.totalSafaris}</p>
+                    <p className="text-xs font-bold text-slate-900">{driver.totalSafaris}</p>
                   </div>
                   <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-100 text-center">
                     <p className="text-[9px] text-stone-400 uppercase font-black tracking-widest mb-1">Vehicle</p>
-                    <p className="text-[10px] font-bold text-[#1a2e1a] leading-tight truncate px-1">{driver.vehicleType.split(' ')[0]}</p>
+                    <p className="text-[10px] font-bold text-slate-900 leading-tight truncate px-1">{driver.vehicleType.split(' ')[0]}</p>
                   </div>
                 </div>
 
@@ -212,7 +212,7 @@ const DriverCard: React.FC<{ driver: Driver, isTop?: boolean }> = ({ driver, isT
                 </div>
 
                 <div className="bg-stone-50/50 p-4 rounded-2xl border border-stone-100/50 relative">
-                  <span className="absolute -top-2 left-4 px-2 bg-white text-[9px] font-black uppercase tracking-widest text-[#c5a059]">Guest Review</span>
+                  <span className="absolute -top-2 left-4 px-2 bg-white text-[9px] font-black uppercase tracking-widest text-[#d5b991]">Guest Review</span>
                   <p className="text-xs italic text-stone-600 leading-relaxed">
                     "{driver.reviewPreview.text}"
                     <span className="block mt-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest">— {driver.reviewPreview.author}</span>
@@ -227,7 +227,7 @@ const DriverCard: React.FC<{ driver: Driver, isTop?: boolean }> = ({ driver, isT
           <button className="flex-1 px-4 py-3 rounded-xl border border-stone-200 text-stone-700 text-xs font-black uppercase tracking-widest hover:bg-stone-50 hover:border-stone-300 transition-all active:scale-95 cursor-pointer">
             Profile
           </button>
-          <button className="flex-[1.5] px-4 py-3 rounded-xl bg-[#1a2e1a] text-white text-xs font-black uppercase tracking-widest hover:bg-[#2a4a2a] transition-all shadow-lg shadow-[#1a2e1a]/20 flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+          <button className="flex-[1.5] px-4 py-3 rounded-xl bg-[#d5b991] text-white text-xs font-black uppercase tracking-widest hover:bg-[#1A1A1A] transition-all shadow-lg shadow-[#d5b991]/20 flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
             Book Now
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -356,12 +356,12 @@ export default function Rankings() {
   }
 
   return (
-    <div className="font-sans text-[#1a2e1a] selection:bg-[#c5a059]/30">
+    <div className="font-sans text-slate-900 selection:bg-[#c5a059]/30">
       {/* Header Section */}
-      <header className="relative bg-[#1a2e1a] text-white pt-32 pb-40 overflow-hidden">
+      <header className="relative bg-[#d5b991] text-white pt-32 pb-40 overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-[url('https://picsum.photos/seed/safari-texture/1200/1200')] opacity-5 mix-blend-overlay grayscale" />
-        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-[#c5a059] rounded-full blur-[160px] opacity-10" />
+        <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-[#d5b991] rounded-full blur-[160px] opacity-10" />
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px]" />
         
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -369,9 +369,9 @@ export default function Rankings() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#c5a059] text-[10px] font-black uppercase tracking-[0.2em] mb-8"
+              className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.2em] mb-8"
             >
-              <div className="w-1 h-1 rounded-full bg-[#c5a059] animate-pulse" />
+              <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
               Elite Guides Program
             </motion.div>
             <motion.h1 
@@ -380,13 +380,13 @@ export default function Rankings() {
               className="text-6xl md:text-8xl font-serif font-bold tracking-tight mb-8 leading-[0.9]"
             >
               The Yala <br />
-              <span className="text-[#c5a059] italic">Elite Circle</span>
+              <span className="text-white/80 italic">Elite Circle</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-xl text-stone-400 leading-relaxed max-w-2xl font-medium"
+              className="text-xl text-white/80 leading-relaxed max-w-2xl font-medium"
             >
               Discover the highest-rated safari drivers and guides in Yala National Park. Ranked by expertise, reliability, and guest satisfaction.
             </motion.p>
@@ -405,7 +405,7 @@ export default function Rankings() {
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-transparent text-xs font-black text-[#1a2e1a] focus:outline-none cursor-pointer uppercase tracking-wider"
+                  className="bg-transparent text-xs font-black text-slate-900 focus:outline-none cursor-pointer uppercase tracking-wider"
                 >
                   <option value="rating">Highest Rating</option>
                   <option value="safaris">Most Safaris</option>
@@ -421,7 +421,7 @@ export default function Rankings() {
                 <select 
                   value={skillFilter || ''}
                   onChange={(e) => setSkillFilter(e.target.value || null)}
-                  className="bg-transparent text-xs font-black text-[#1a2e1a] focus:outline-none cursor-pointer uppercase tracking-wider"
+                  className="bg-transparent text-xs font-black text-slate-900 focus:outline-none cursor-pointer uppercase tracking-wider"
                 >
                   <option value="">All Guides</option>
                   <option value="Leopard Tracking Expert">Leopard Tracking</option>
@@ -485,14 +485,14 @@ export default function Rankings() {
         </section>
 
         {/* Ranking Explanation Section */}
-        <section className="bg-[#1a2e1a] rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+        <section className="bg-[#d5b991] rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#c5a059] rounded-full blur-[100px] opacity-10 -mr-32 -mt-32" />
           
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-[#c5a059]/20 flex items-center justify-center">
-                  <Info className="w-6 h-6 text-[#c5a059]" />
+                  <Info className="w-6 h-6 text-white/80" />
                 </div>
                 <h2 className="text-3xl font-bold">How we rank our guides</h2>
               </div>
@@ -508,7 +508,7 @@ export default function Rankings() {
                   { label: 'Years of Experience', weight: '10%', desc: 'Total professional tenure in Yala National Park' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                    <div className="text-2xl font-bold text-[#c5a059] w-16">{item.weight}</div>
+                    <div className="text-2xl font-bold text-white w-16">{item.weight}</div>
                     <div>
                       <h4 className="font-bold text-sm">{item.label}</h4>
                       <p className="text-xs text-stone-500">{item.desc}</p>
@@ -526,7 +526,7 @@ export default function Rankings() {
                   className="rounded-2xl shadow-2xl border border-white/10"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-2xl text-[#1a2e1a] max-w-xs">
+                <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-2xl text-slate-900 max-w-xs">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     <span className="font-bold">100% Verified</span>

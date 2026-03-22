@@ -123,7 +123,7 @@
    DARK MODE VARIABLES
 ========================================= */
 .dark .map-scope {
-  --bg: #0f172a;
+  --bg: #C5A059;
   --card-bg: rgba(30, 41, 59, 0.85);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
@@ -2100,14 +2100,14 @@ body.ranger-mode-active {
   --primary: #ef4444; /* Tactical Red */
   --primary-glow: rgba(239, 68, 68, 0.4);
   --accent: #f87171;
-  --bg-tactical: #0f172a;
+  --bg-tactical: #C5A059;
   --sidebar-tactical: #1e293b;
   --text-tactical: #f1f5f9;
 }
 
 body.ranger-mode-active .navbar {
   border-bottom: 2px solid var(--primary);
-  background: #0f172a !important; /* Force dark navbar in tactical mode */
+  background: #C5A059 !important; /* Force dark navbar in tactical mode */
 }
 
 body.ranger-mode-active .logo {

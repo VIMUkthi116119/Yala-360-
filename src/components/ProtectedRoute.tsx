@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<Props> = ({ children }) => {
         <div className="flex flex-col items-center gap-4">
           <div
             className="w-14 h-14 rounded-full border-4 border-t-transparent animate-spin"
-            style={{ borderColor: 'rgba(197,160,89,0.3)', borderTopColor: '#C5A059' }}
+            style={{ borderColor: 'rgba(197, 160, 89,0.3)', borderTopColor: '#C5A059' }}
           />
           <p className="text-xs uppercase tracking-[0.3em] font-bold text-gray-400">Loading…</p>
         </div>

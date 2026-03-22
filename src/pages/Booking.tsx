@@ -185,11 +185,6 @@ export default function Booking() {
                   <span className={cn('mt-2 text-xs font-bold uppercase tracking-tighter text-center', isActive ? 'text-[#1A1A1A]' : 'text-gold/50')}>
                     {step}
                   </span>
-                  {index < STEPS.length - 1 && (
-                    <div
-                      className={cn('absolute top-5 left-[50%] w-full h-[2px] -z-0', isCompleted ? 'bg-[#1A1A1A]' : 'bg-gold/20')}
-                    />
-                  )}
                 </div>
               );
             })}
@@ -233,7 +228,7 @@ function Step1SafariType({ booking, setBooking, onNext }: any) {
               'bg-white rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 group shadow-sm'
             )}
             style={booking.safariType === type.id
-              ? { boxShadow: `0 20px 60px rgba(197,160,89,0.25)`, outline: `2px solid ${GOLD}` }
+              ? { boxShadow: `0 20px 60px rgba(197, 160, 89,0.25)`, outline: `2px solid ${GOLD}` }
               : { outline: '2px solid transparent' }}
           >
             <div className="h-48 overflow-hidden relative">
@@ -314,7 +309,7 @@ function Step2DateCrowd({ booking, setBooking, onNext, onPrev }: any) {
   return (
     <div className="space-y-10">
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-bold uppercase tracking-widest mb-2" style={{ background: 'rgba(197,160,89,0.1)', color: GOLD }}>
+        <div className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-bold uppercase tracking-widest mb-2" style={{ background: 'rgba(197, 160, 89,0.1)', color: GOLD }}>
           Selected: {safariType?.title}
         </div>
         <h2 className="text-3xl md:text-4xl serif text-gray-900">Select Date & Time</h2>
@@ -366,7 +361,7 @@ function Step2DateCrowd({ booking, setBooking, onNext, onPrev }: any) {
           return (
             <div key={slot.id} className="bg-white p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-gray-100">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(197,160,89,0.15)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(197, 160, 89,0.15)' }}>
                   <Clock className="w-6 h-6" style={{ color: GOLD }} />
                 </div>
                 <div>
@@ -614,7 +609,7 @@ function Step4JeepDriver({ booking, setBooking, onNext, onPrev }: any) {
                   </div>
                   <p className="text-xs text-gray-400">{guide.experienceYears} Yrs Experience</p>
                   <p className="text-xs text-gray-400">{guide.languages}</p>
-                  <span className="text-[9px] px-2 py-0.5 font-medium" style={{ background: 'rgba(197,160,89,0.15)', color: GOLD }}>{guide.specialty}</span>
+                  <span className="text-[9px] px-2 py-0.5 font-medium" style={{ background: 'rgba(197, 160, 89,0.15)', color: GOLD }}>{guide.specialty}</span>
                 </div>
               </div>
               <button onClick={() => toggleGuide(guide.id)} className={cn('w-full mt-4 py-2 text-xs font-bold uppercase tracking-widest transition-all', selectedGuides.includes(guide.id) ? 'text-white bg-[#1A1A1A]' : 'text-gray-700 bg-gray-100 hover:text-white')}>
@@ -651,15 +646,15 @@ function Step4JeepDriver({ booking, setBooking, onNext, onPrev }: any) {
                   </p>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-3" style={{ background: 'rgba(197,160,89,0.1)' }}>
+                  <div className="p-3" style={{ background: 'rgba(197, 160, 89,0.1)' }}>
                     <p className="text-lg serif text-gray-900">{showProfile.data.rating}</p>
                     <p className="text-[10px] uppercase tracking-widest text-gray-400">Rating</p>
                   </div>
-                  <div className="p-3" style={{ background: 'rgba(197,160,89,0.1)' }}>
+                  <div className="p-3" style={{ background: 'rgba(197, 160, 89,0.1)' }}>
                     <p className="text-lg serif text-gray-900">{showProfile.data.experienceYears}y</p>
                     <p className="text-[10px] uppercase tracking-widest text-gray-400">Exp</p>
                   </div>
-                  <div className="p-3" style={{ background: 'rgba(197,160,89,0.1)' }}>
+                  <div className="p-3" style={{ background: 'rgba(197, 160, 89,0.1)' }}>
                     <p className="text-lg serif text-gray-900">{showProfile.type === 'driver' ? showProfile.data.safariCount : showProfile.data.languages.split(',').length}</p>
                     <p className="text-[10px] uppercase tracking-widest text-gray-400">{showProfile.type === 'driver' ? 'Safaris' : 'Languages'}</p>
                   </div>
@@ -764,7 +759,7 @@ function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmati
                 {booking.selectedGuides?.length > 0 && <p className="text-xs text-gray-400">+ Wildlife Guide</p>}
               </div>
             </div>
-            <div className="p-4 flex items-center gap-4" style={{ background: 'rgba(197,160,89,0.08)' }}>
+            <div className="p-4 flex items-center gap-4" style={{ background: 'rgba(197, 160, 89,0.08)' }}>
               <Info className="w-5 h-5 flex-shrink-0" style={{ color: GOLD }} />
               <p className="text-xs text-gray-600">We recommend arriving 15 minutes early at the park entrance gate.</p>
             </div>
@@ -1202,7 +1197,7 @@ function Step6Confirmation({ booking, confirmationData }: any) {
           </div>
 
           {/* QR Code */}
-          <div className="flex flex-col items-center justify-center space-y-4 p-8 border border-dashed rounded-2xl" style={{ borderColor: GOLD, background: 'rgba(197,160,89,0.03)' }}>
+          <div className="flex flex-col items-center justify-center space-y-4 p-8 border border-dashed rounded-2xl" style={{ borderColor: GOLD, background: 'rgba(197, 160, 89,0.03)' }}>
             <div ref={qrRef} className="bg-white p-4 rounded-xl shadow-md">
               <QRCodeSVG
                 value={qrData}
@@ -1228,7 +1223,7 @@ function Step6Confirmation({ booking, confirmationData }: any) {
         </div>
 
         {/* Action Bar */}
-        <div className="p-6 border-t border-gray-100 flex flex-wrap gap-6 justify-center" style={{ background: 'rgba(197,160,89,0.05)' }}>
+        <div className="p-6 border-t border-gray-100 flex flex-wrap gap-6 justify-center" style={{ background: 'rgba(197, 160, 89,0.05)' }}>
           <button
             onClick={handleDownloadReceipt}
             className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-100"
