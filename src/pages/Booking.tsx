@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
 import { motion, AnimatePresence } from 'framer-motion';
 import { saveBooking } from '../services/firebaseBooking';
+import { useAuth } from '../contexts/AuthContext';
 import { format as formatDate } from 'date-fns';
 import {
   Calendar,
@@ -677,6 +678,7 @@ function Step4JeepDriver({ booking, setBooking, onNext, onPrev }: any) {
 /* ════ STEP 5 — Review & Pay ════ */
 function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmationData }: any) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { currentUser } = useAuth();  // ← get logged-in user to save userId in booking
   const safariType = SAFARI_TYPES.find(t => t.id === booking.safariType);
   const totalPrice = ((safariType?.price || 85) * (booking.visitors?.count || 1)) + (booking.selectedDrivers.length * 80) + (booking.selectedGuides?.length > 0 ? 40 : 0);
 
@@ -693,7 +695,7 @@ function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmati
         totalJeeps: booking.selectedDrivers.length,
       };
 
-      // Save to Firebase Firestore
+      // Save to Firebase Firestore — include userId so we can reliably look up this booking
       await saveBooking({
         bookingId,
         touristName: booking.visitors?.fullName || '',
@@ -713,6 +715,8 @@ function Step5ReviewPayment({ booking, setBooking, onNext, onPrev, setConfirmati
         driverName: driverDetails.name,
         vehicleType: driverDetails.vehicleType,
         specialRequests: booking.visitors?.specialRequests || '',
+        // Link booking to the Firebase Auth user if logged in
+        userId: currentUser?.uid ?? undefined,
       });
 
       setConfirmationData({ bookingId, driverDetails, safariDetails });

@@ -94,27 +94,52 @@ export async function deleteBooking(docId: string): Promise<void> {
   await deleteDoc(doc(db, BOOKINGS_COLLECTION, docId));
 }
 
-/** Get the latest booking ID for a specific user email */
-export async function getUserLatestBooking(email?: string | null): Promise<string | null> {
-  if (!email) return null;
+/**
+ * Get the latest booking ID for a user.
+ * First tries by userId (Firebase UID — most reliable, set during booking when logged in),
+ * then falls back to email match.
+ * Always returns the most recently created booking's bookingId.
+ */
+export async function getUserLatestBooking(
+  email?: string | null,
+  userId?: string | null
+): Promise<string | null> {
+  if (!email && !userId) return null;
+
   try {
-    const q = query(
-      collection(db, BOOKINGS_COLLECTION),
-      where('email', '==', email)
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) return null;
-    
-    // Sort client-side to avoid needing a composite index
-    const docsData = snap.docs.map(d => d.data() as FirestoreBooking);
-    docsData.sort((a, b) => {
+    let docs: FirestoreBooking[] = [];
+
+    // ── Step 1: Try by userId (Firebase UID) — most reliable ─────────────
+    if (userId) {
+      const q = query(
+        collection(db, BOOKINGS_COLLECTION),
+        where('userId', '==', userId)
+      );
+      const snap = await getDocs(q);
+      docs = snap.docs.map(d => d.data() as FirestoreBooking);
+    }
+
+    // ── Step 2: Fall back to email match if no results by UID ─────────────
+    if (docs.length === 0 && email) {
+      const q = query(
+        collection(db, BOOKINGS_COLLECTION),
+        where('email', '==', email)
+      );
+      const snap = await getDocs(q);
+      docs = snap.docs.map(d => d.data() as FirestoreBooking);
+    }
+
+    if (docs.length === 0) return null;
+
+    // Sort by createdAt descending — most recent booking first
+    docs.sort((a, b) => {
       type TimestampLike = { toMillis?: () => number };
       const timeA = ((a.createdAt as unknown) as TimestampLike)?.toMillis?.() || 0;
       const timeB = ((b.createdAt as unknown) as TimestampLike)?.toMillis?.() || 0;
-      return timeB - timeA;
+      return timeB - timeA; // descending = newest first
     });
-    
-    return docsData[0].bookingId || null;
+
+    return docs[0].bookingId || null;
   } catch (err) {
     console.error('Error fetching latest booking:', err);
     return null;

@@ -97,9 +97,9 @@ const Reviews: React.FC = () => {
     }
     setShowModal(true);
     
-    // Auto-fill booking ID if available
+    // Auto-fill booking ID if available (tries userId first, then falls back to email)
     try {
-      const latestBookingId = await getUserLatestBooking(currentUser.email);
+      const latestBookingId = await getUserLatestBooking(currentUser.email, currentUser.uid);
       if (latestBookingId) {
         setNewReview(prev => ({ ...prev, bookingId: latestBookingId }));
       }

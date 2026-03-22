@@ -132,7 +132,7 @@ const Gallery: React.FC = () => {
     setShowUpload(true);
     
     try {
-      const latestBookingId = await getUserLatestBooking(currentUser.email);
+      const latestBookingId = await getUserLatestBooking(currentUser.email, currentUser.uid);
       if (latestBookingId) {
         setBookingId(latestBookingId);
       }
