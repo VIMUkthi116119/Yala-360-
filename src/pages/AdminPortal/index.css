@@ -1,30 +1,31 @@
-@import "tailwindcss";
+/* AdminPortal CSS — No Tailwind dependency */
 
 :root {
   --color-beige: #F5F1E9;
   --color-gold: #C5A059;
   --color-dark: #1A1A1A;
-}
-
-@theme {
   --color-safari-green: #1a2e1a;
   --color-safari-green-light: #2d4a2d;
-  --color-safari-sand: var(--color-beige);
-  --color-safari-gold: var(--color-gold);
+  --color-safari-sand: #F5F1E9;
+  --color-safari-gold: #C5A059;
   --color-safari-dark: #ffffff;
   --color-safari-card: #f8f9fa;
-  
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-@layer base {
-  body {
-    @apply bg-white text-slate-900 antialiased;
-  }
+body {
+  background-color: #fff;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-sans);
 }
 
 .glass-card {
-  @apply bg-white border border-slate-200 shadow-sm rounded-2xl;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  border-radius: 1rem;
 }
 
 .premium-gradient {
@@ -32,6 +33,11 @@
 }
 
 .gold-text {
-  @apply bg-gradient-to-r from-safari-gold to-safari-sand bg-clip-text text-transparent;
+  background: linear-gradient(to right, #C5A059, #F5F1E9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
